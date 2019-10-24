@@ -9,7 +9,7 @@ library(tidyverse)
 library(leaflet)
 
 #read data files in
-cardio <- read_delim("data/cardio_train.csv", delim= ";")
+cardio <- read_csv2("data/cardio_train.csv")
 vital <- read_csv("data/Data1.csv")
 vital1 <- spread(vital,Break_Out_Category,Break_Out)
 
@@ -33,17 +33,22 @@ temp %>% group_by(Topic) %>%
   ggplot() + geom_bar(aes(Topic, fill=Topic))
 
 
-
-
 #Cardio Code
 mycardio <- cardio %>%
-  rename("data" = `id;age;gender;height;weight;ap_hi;ap_lo;cholesterol;gluc;smoke;alco;active;cardio`) %>%
-  separate(data, into = c("ID", "Age", "Gender", "Height", "Weight", "Systolic blood pressur", 
-                          "Diastolic blood pressure", "Cholesterol", "Glucose", "Smoke",
-                          "Alcohol", "Active", "Cardio"), sep=";")
+  rename("ID" = id,
+         "Age" = age,
+         "Gender" = gender,
+         "Height" = height,
+         "Weight" = weight,
+         "Systolic blood pressure" = ap_hi,
+         "Diastolic blood pressure" = ap_lo,
+         "Cholesterol" = cholesterol,
+         "Glucose" = gluc,
+         "Smoke" = smoke,
+         "Alcohol" = alco,
+         "Active" = active,
+         "Cardio" = cardio)
 
-
-# DATA MANIPULATION
 glimpse(mycardio)
 mycardio <- mycardio %>%
   mutate(Age = as.numeric(Age)/365) %>%
@@ -66,6 +71,8 @@ mycardio <- mycardio %>%
 mycardio$HeightFeet <- NULL
 mycardio$HeightInches <- NULL
 
+mycardio <- mycardio %>%
+  select(ID:Height, HeightLong, Weight:Cardio)
 
 
 
