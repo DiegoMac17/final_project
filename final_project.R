@@ -33,8 +33,42 @@ temp %>% group_by(Topic) %>%
   ggplot() + geom_bar(aes(Topic, fill=Topic))
 
 
-#wow cool wowo
-#Coolasbdasjhd
-#MEAT
-#ahsdj
+
+
+#Cardio Code
+mycardio <- cardio %>%
+  rename("data" = `id;age;gender;height;weight;ap_hi;ap_lo;cholesterol;gluc;smoke;alco;active;cardio`) %>%
+  separate(data, into = c("ID", "Age", "Gender", "Height", "Weight", "Systolic blood pressur", 
+                          "Diastolic blood pressure", "Cholesterol", "Glucose", "Smoke",
+                          "Alcohol", "Active", "Cardio"), sep=";")
+
+
+# DATA MANIPULATION
+glimpse(mycardio)
+mycardio <- mycardio %>%
+  mutate(Age = as.numeric(Age)/365) %>%
+  mutate(Gender = case_when(Gender == "1" ~ "Female", 
+                            Gender == "2" ~ "Male")) %>%
+  mutate(Weight = as.numeric(Weight)*2.205) %>%
+  mutate(Smoke = case_when(Smoke == "0" ~ "No", 
+                           Smoke == "1" ~ "Yes")) %>%
+  mutate(Alcohol = case_when(Alcohol == "0" ~ "No", 
+                             Alcohol == "1" ~ "Yes")) %>%
+  mutate(Active = case_when(Active == "0" ~ "No", 
+                            Active == "1" ~ "Yes")) %>%
+  mutate(Cardio = case_when(Cardio == "0" ~ "No", 
+                            Cardio == "1" ~ "Yes")) %>%
+  mutate(Height = as.numeric(Height)/2.54) %>%
+  mutate(HeightFeet = floor(Height/12)) %>%
+  mutate(HeightInches = round(Height - (12*HeightFeet), 1)) %>%
+  mutate(HeightLong = paste(HeightFeet,"'",HeightInches))
+
+mycardio$HeightFeet <- NULL
+mycardio$HeightInches <- NULL
+
+
+
+
+
+
 
