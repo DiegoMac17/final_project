@@ -31,3 +31,6 @@ temp %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
 
 temp %>% group_by(Topic) %>%
   ggplot() + geom_bar(aes(Topic, fill=Topic))
+
+
+#wow cool
