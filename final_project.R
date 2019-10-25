@@ -26,7 +26,7 @@ temp <- temp %>% mutate(Latitude = as.numeric(Latitude),
 temp <- temp %>% top_n(n=-100)
 
 temp %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
-  addTiles() %>% setView(-74.00,40.71,zoom=12) %>% addMarkers(~Longitude, ~Latitude)
+  addTiles() %>% setView(-98.00,38.71,zoom=5) %>% addMarkers(~Longitude, ~Latitude)
 
 
 temp %>% group_by(Topic) %>%
