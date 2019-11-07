@@ -14,8 +14,11 @@ vital <- read_csv("data/Data1.csv")
 vital1 <- spread(vital,Break_Out_Category,Break_Out)
 
 
-temp <- vital1 %>%
-  select(Year, Age, GeoLocation, Topic, Data_Value_Type, Data_Value) %>% na.omit()
+
+temp <- vital%>%
+  select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,HighConfidenceLimit,LowConfidenceLimit,Data_Value) %>% 
+  arrange(Topic) %>% 
+  na.omit()
 temp <- temp %>% mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
                         GeoLocation = str_remove_all(GeoLocation, "\\)"))
 temp <-  temp %>%
@@ -74,6 +77,7 @@ mycardio$HeightInches <- NULL
 mycardio <- mycardio %>%
   select(ID:Height, HeightLong, Weight:Cardio)
 
+<<<<<<< HEAD
 # Gender     n
 # <chr>  <int>
 # 1 Female 45530
@@ -131,6 +135,81 @@ percentLife %>%
   
 
 
+
+=======
+temp %>% 
+  filter(Topic=="Acute Myocardial Infarction (Heart Attack)" & Year==2000 & LocationAbbr=="AL") %>% 
+  view()
+temp1 <-  temp%>% 
+  group_by(LocationAbbr,Topic) %>% 
+  summarise(avg=mean(Data_Value)) %>% 
+  arrange(Topic)
+
+temp2 <- temp1 %>% 
+  group_by(Topic) %>% 
+  top_n(5,avg)
+temp2 %>% 
+  ggplot()+
+  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=Topic))+
+  coord_flip()+
+  labs(title = "Coronary Heart Disease")+
+  facet_wrap(~Topic,scales = "free",ncol = 3)
+>>>>>>> bb9a31031f1f095d983e1e973f40d90d639d7473
+
+# Gender     n
+# <chr>  <int>
+# 1 Female 45530
+# 2 Male   24470
+#Need to standardize the data.
+# 
+# facetCardio <- mycardio %>%
+#   select(Gender, Smoke:Cardio) %>%
+#   gather("Lifestyle", "Occurance", -Gender) %>%
+#   group_by(Gender, Lifestyle, Occurance) %>%
+#   count()
+# 
+# actFe <- facetCardio %>%
+#   filter(Gender == "Female" & Lifestyle == "Active" & Occurance == "Yes") %>%
+#   mutate(percent = n/45530) %>%
+#   select(Gender, Lifestyle, percent)
+# alcFe <- facetCardio %>%
+#   filter(Gender == "Female" & Lifestyle == "Alcohol" & Occurance == "Yes") %>%
+#   mutate(percent = n/45530) %>%
+#   select(Gender, Lifestyle, percent)
+# cardFe <- facetCardio %>%
+#   filter(Gender == "Female" & Lifestyle == "Cardio" & Occurance == "Yes") %>%
+#   mutate(percent = n/45530) %>%
+#   select(Gender, Lifestyle, percent)
+# smoFe <- facetCardio %>%
+#   filter(Gender == "Female" & Lifestyle == "Smoke" & Occurance == "Yes") %>%
+#   mutate(percent = n/45530) %>%
+#   select(Gender, Lifestyle, percent)
+# 
+# actMa <- facetCardio %>%
+#   filter(Gender == "Male" & Lifestyle == "Active" & Occurance == "Yes") %>%
+#   mutate(percent = n/45530) %>%
+#   select(Gender, Lifestyle, percent)
+# alcMa <- facetCardio %>%
+#   filter(Gender == "Male" & Lifestyle == "Alcohol" & Occurance == "Yes") %>%
+#   mutate(percent = n/45530) %>%
+#   select(Gender, Lifestyle, percent)
+# cardMa <- facetCardio %>%
+#   filter(Gender == "Male" & Lifestyle == "Cardio" & Occurance == "Yes") %>%
+#   mutate(percent = n/45530) %>%
+#   select(Gender, Lifestyle, percent)
+# smoMa <- facetCardio %>%
+#   filter(Gender == "Male" & Lifestyle == "Smoke" & Occurance == "Yes") %>%
+#   mutate(percent = n/45530) %>%
+#   select(Gender, Lifestyle, percent)
+# 
+# percentLife <- bind_rows(actFe, actMa, alcFe, alcMa, cardFe, cardMa, smoFe, smoMa)
+# percentLife$Occurance <- NULL
+# 
+# 
+# percentLife %>%
+#   ggplot() +
+#   geom_bar(mapping = aes(x = Gender, y = percent, fill = Lifestyle), stat = "identity") +
+#   facet_wrap(~Lifestyle, scales = "free_y")
 
 
 
