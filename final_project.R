@@ -26,7 +26,7 @@ temp <- temp %>% mutate(Latitude = as.numeric(Latitude),
 temp <- temp %>% top_n(n=-100)
 
 temp %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
-  addTiles() %>% setView(-98.00,38.71,zoom=5) %>% addMarkers(~Longitude, ~Latitude)
+  addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
 
 
 temp %>% group_by(Topic) %>%
@@ -74,6 +74,61 @@ mycardio$HeightInches <- NULL
 mycardio <- mycardio %>%
   select(ID:Height, HeightLong, Weight:Cardio)
 
+# Gender     n
+# <chr>  <int>
+# 1 Female 45530
+# 2 Male   24470
+#Need to standardize the data.
+
+facetCardio <- mycardio %>%
+  select(Gender, Smoke:Cardio) %>%
+  gather("Lifestyle", "Occurance", -Gender) %>%
+  group_by(Gender, Lifestyle, Occurance) %>%
+  count()
+
+actFe <- facetCardio %>%
+  filter(Gender == "Female" & Lifestyle == "Active" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+alcFe <- facetCardio %>%
+  filter(Gender == "Female" & Lifestyle == "Alcohol" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+cardFe <- facetCardio %>%
+  filter(Gender == "Female" & Lifestyle == "Cardio" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+smoFe <- facetCardio %>%
+  filter(Gender == "Female" & Lifestyle == "Smoke" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+
+actMa <- facetCardio %>%
+  filter(Gender == "Male" & Lifestyle == "Active" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+alcMa <- facetCardio %>%
+  filter(Gender == "Male" & Lifestyle == "Alcohol" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+cardMa <- facetCardio %>%
+  filter(Gender == "Male" & Lifestyle == "Cardio" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+smoMa <- facetCardio %>%
+  filter(Gender == "Male" & Lifestyle == "Smoke" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+
+percentLife <- bind_rows(actFe, actMa, alcFe, alcMa, cardFe, cardMa, smoFe, smoMa)
+percentLife$Occurance <- NULL
+
+
+percentLife %>%
+  ggplot() +
+  geom_bar(mapping = aes(x = Gender, y = percent, fill = Lifestyle), stat = "identity") +
+  facet_wrap(~Lifestyle, scales = "free_y")
+  
 
 
 
