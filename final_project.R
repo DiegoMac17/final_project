@@ -84,10 +84,15 @@ temp1 <-  temp%>%
   group_by(LocationAbbr,Topic) %>% 
   summarise(avg=mean(Data_Value)) %>% 
   arrange(Topic)
-temp2 <-  temp1 %>% 
-  spread(Topic,avg)
-temp1%>% 
-  filter(Topic=="Coronary Heart Disease") %>% 
+
+temp2 <- temp1 %>% 
+  group_by(Topic) %>% 
+  top_n(5,avg)
+temp2 %>% 
   ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=avg))+
-  coord_flip()
+  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=Topic))+
+  coord_flip()+
+  labs(title = "Coronary Heart Disease")+
+  facet_wrap(~Topic,scales = "free",ncol = 3)
+
+
