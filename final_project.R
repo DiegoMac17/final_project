@@ -91,3 +91,16 @@ temp1%>%
   ggplot()+
   geom_col(aes(reorder(LocationAbbr,avg),avg,fill=avg))+
   coord_flip()
+
+
+
+####Joining and mapping####
+vitalGender <- vital%>%
+  select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,HighConfidenceLimit,LowConfidenceLimit,Data_Value) %>% 
+  arrange(Topic) %>% 
+  na.omit()
+vitalGender <- vitalGender %>% filter(Break_Out_Category=="Gender") %>%
+  select(-Break_Out_Category) %>% rename(Gender = Break_Out)
+
+cardioVital <- left_join(vitalGender, mycardio, by ="Gender")
+
