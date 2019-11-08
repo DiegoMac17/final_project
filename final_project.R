@@ -4,11 +4,11 @@
 #Isaiah Vaughnn
 
 
-#load libraries
+####load libraries####
 library(tidyverse)
 library(leaflet)
 
-#read data files
+####read data files####
 cardio <- read_csv2("data/cardio_train.csv")
 vital <- read_csv("data/Data1.csv")
 
@@ -177,7 +177,7 @@ mycardio$HeightInches <- NULL
 mycardio <- mycardio %>%
   select(ID:Height, HeightLong, Weight:Cardio)
 
-<<<<<<< HEAD
+
 # Gender     n
 # <chr>  <int>
 # 1 Female 45530
@@ -236,7 +236,7 @@ percentLife %>%
 
 
 
-=======
+
 temp %>% 
   filter(Topic=="Acute Myocardial Infarction (Heart Attack)" & Year==2000 & LocationAbbr=="AL") %>% 
   view()
@@ -263,8 +263,26 @@ vitalGender <- vital%>%
 vitalGender <- vitalGender %>% filter(Break_Out_Category=="Gender") %>%
   select(-Break_Out_Category) %>% rename(Gender = Break_Out)
 
-cardioVital <- left_join(vitalGender, mycardio, by ="Gender")
-=======
+vitalGender <- vitalGender%>% mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
+                                     GeoLocation = str_remove_all(GeoLocation, "\\)")) %>% 
+  separate(GeoLocation,into = c("Latitude", "Longitude"),  ",") %>% 
+  mutate(Latitude = as.numeric(Latitude),
+         Longitude = as.numeric(Longitude)) %>% 
+  na.omit()
+
+#cardioVital <- left_join(vitalGender, mycardio, by ="Gender")
+mycardio
+cardioVitalMS <- left_join(vitalGenderMS, mycardio, by ="Gender")
+
+
+vitalGender %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
+  addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
+
+
+
+
+
+
   geom_col(aes(reorder(LocationAbbr,avg),avg,fill=Topic))+
   coord_flip()+
   labs(title = "Coronary Heart Disease")+
