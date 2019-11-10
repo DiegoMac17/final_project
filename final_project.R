@@ -12,7 +12,7 @@ library(leaflet)
 cardio <- read_csv2("data/cardio_train.csv")
 vital <- read_csv("data/Data1.csv")
 
-vital %>% arrange(desc(Data_Value)) %>% view()
+
 
 #wrangle the data 
 rate<- vital%>%
@@ -124,12 +124,29 @@ state_avg_highest%>%
   guides(fill=FALSE)+
   theme(plot.title = element_text(hjust = 0.5))
 
-#the above plots are the same just filtered for topic or faceted by topic. filtering produces 6 graphs fro each topic.
+#the above plots are the same just filtered for topic or faceted by topic. filtering produces 6 graphs for each topic.
 #the plots faceted by topic produces two 
 #We can decide which is a better visualization
 
 
-vital1 <- spread(vital,Break_Out_Category,Break_Out)
+#find the average mortality rate among genders for each topic
+Gender_average <- rate%>% 
+  filter(Break_Out_Category=="Gender") %>%
+  select(-Break_Out_Category) %>% 
+  rename(Gender = Break_Out) %>% 
+  group_by(Topic,Gender,Data_Value_Type) %>% 
+  summarise(avg=mean(Data_Value))
+
+#Plot the average mortality for each gender by topic
+Gender_average %>% 
+  ggplot()+
+  geom_col(aes(Gender,avg,fill=Data_Value_Type),position = "dodge")+
+  facet_wrap(~Topic,scales = "free")+
+  labs(title = "Average Mortality among Gender")+
+  theme(plot.title = element_text(hjust = 0.5,size = 25))
+
+
+
 
 temp %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
   addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
@@ -237,21 +254,6 @@ percentLife %>%
 
 
 
-temp %>% 
-  filter(Topic=="Acute Myocardial Infarction (Heart Attack)" & Year==2000 & LocationAbbr=="AL") %>% 
-  view()
-temp1 <-  temp%>% 
-  group_by(LocationAbbr,Topic) %>% 
-  summarise(avg=mean(Data_Value)) %>% 
-  arrange(Topic)
-
-temp2 <- temp1 %>% 
-  group_by(Topic) %>% 
-  top_n(5,avg)
-temp2 %>% 
-  ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=avg))+
-  coord_flip()
 
 
 
@@ -272,21 +274,13 @@ vitalGender <- vitalGender%>% mutate(GeoLocation = str_remove_all(GeoLocation, "
 
 #cardioVital <- left_join(vitalGender, mycardio, by ="Gender")
 mycardio
-cardioVitalMS <- left_join(vitalGenderMS, mycardio, by ="Gender")
+cardioVitalMS <- left_join(vitalGender, mycardio, by ="Gender")
 
 
 vitalGender %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
   addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
 
 
-
-
-
-
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=Topic))+
-  coord_flip()+
-  labs(title = "Coronary Heart Disease")+
-  facet_wrap(~Topic,scales = "free",ncol = 3)
 
 # Gender     n
 # <chr>  <int>
