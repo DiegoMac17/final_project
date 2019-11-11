@@ -7,6 +7,7 @@
 ####load libraries####
 library(tidyverse)
 library(leaflet)
+library(RColorBrewer)
 
 ####read data files####
 cardio <- read_csv2("data/cardio_train.csv")
@@ -174,7 +175,7 @@ mycardio <- mycardio %>%
   mutate(Age = as.numeric(Age)/365) %>%
   mutate(Gender = case_when(Gender == "1" ~ "Female", 
                             Gender == "2" ~ "Male")) %>%
-  mutate(Weight = as.numeric(Weight)*2.205) %>%
+  mutate(Weight = as.numeric(Weight)*2.205/10) %>%
   mutate(Smoke = case_when(Smoke == "0" ~ "No", 
                            Smoke == "1" ~ "Yes")) %>%
   mutate(Alcohol = case_when(Alcohol == "0" ~ "No", 
@@ -249,6 +250,32 @@ percentLife %>%
   geom_bar(mapping = aes(x = Gender, y = percent, fill = Lifestyle), stat = "identity") +
   facet_wrap(~Lifestyle, scales = "free_y")
   
+
+#People with VERY HIGH weights have distolic and systolic values that are off the charts
+
+mycolors <- palette(brewer.pal(n=3, name="Set1"))
+
+mycardio %>%
+  filter(`Diastolic blood pressure` < 500 & `Systolic blood pressure` < 400 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
+  filter(Weight < 500) %>%
+  ggplot() +
+  geom_point(mapping = aes(x = Weight,
+                           y = `Systolic blood pressure`,
+                           color = Weight),
+             alpha = 0.1,
+             position= "dodge") +
+  scale_fill_manual(values = mycolors)
+
+
+mycardio %>%
+  filter(`Diastolic blood pressure` < 1000) %>%
+  arrange(desc(`Diastolic blood pressure`)) %>%
+  top_n(10)
+
+cardio %>%
+  filter(ap_hi > 200) %>%
+  arrange(desc(ap_hi)) %>%
+  top_n(10)
 
 
 temp %>% 
