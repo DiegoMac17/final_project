@@ -77,7 +77,7 @@ mycardio$HeightInches <- NULL
 mycardio <- mycardio %>%
   select(ID:Height, HeightLong, Weight:Cardio)
 
-<<<<<<< HEAD
+#<<<<<<< HEAD
 # Gender     n
 # <chr>  <int>
 # 1 Female 45530
@@ -136,7 +136,7 @@ percentLife %>%
 
 
 
-=======
+#=======
 temp %>% 
   filter(Topic=="Acute Myocardial Infarction (Heart Attack)" & Year==2000 & LocationAbbr=="AL") %>% 
   view()
@@ -154,7 +154,7 @@ temp2 %>%
   coord_flip()+
   labs(title = "Coronary Heart Disease")+
   facet_wrap(~Topic,scales = "free",ncol = 3)
->>>>>>> bb9a31031f1f095d983e1e973f40d90d639d7473
+#>>>>>>> bb9a31031f1f095d983e1e973f40d90d639d7473
 
 # Gender     n
 # <chr>  <int>
