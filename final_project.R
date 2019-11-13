@@ -8,6 +8,10 @@
 library(tidyverse)
 library(leaflet)
 library(RColorBrewer)
+library(socviz)
+library(usmap)
+library(maps)
+library(cowplot)
 
 ####read data files####
 cardio <- read_csv2("data/cardio_train.csv")
@@ -302,7 +306,8 @@ temp2 %>%
 
 ####Joining and mapping####
 vitalGender <- vital%>%
-  select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,HighConfidenceLimit,LowConfidenceLimit,Data_Value) %>% 
+  select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
+         HighConfidenceLimit,LowConfidenceLimit,Data_Value) %>% 
   arrange(Topic) %>% 
   na.omit()
 vitalGender <- vitalGender %>% filter(Break_Out_Category=="Gender") %>%
@@ -317,13 +322,64 @@ vitalGender <- vitalGender%>% mutate(GeoLocation = str_remove_all(GeoLocation, "
 
 #cardioVital <- left_join(vitalGender, mycardio, by ="Gender")
 #mycardio
-cardioVitalMS <- left_join(vitalGender, mycardio, by ="Gender")
 
 
-vitalGender %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
-  addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
+#strokeM %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
+#  addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
+
+####What lifestyle combination has the highest mortality rates for stroke in men and female ?####
+stroke_gender <- vitalGender %>%
+  filter(Topic == "Stroke") %>% group_by(Gender) %>%
+  summarise(avg_deathRate = mean(Data_Value))
+
+cardioJoin <- mycardio %>%
+  group_by(Gender, Smoke, Alcohol, Active ,Cardio) %>% summarise(n = n())
 
 
+stroke_lifestyle <- left_join(cardioJoin, stroke_gender)
+
+plot_stroke_m <- stroke_lifestyle %>% filter(Gender=="Female") %>%
+  arrange(desc(n)) %>% head(1)
+plot_stroke_f <- stroke_lifestyle %>% filter(Gender=="Male") %>%
+  arrange(desc(n)) %>% head(1)
+
+plot_stroke <- bind_rows(plot_stroke_m,plot_stroke_f)
+
+plot_stroke %>% ggplot() +
+  geom_col(aes(x=Gender, y= n, fill = avg_deathRate))
+
+
+#### map of the us for stroke avg death rate ####
+strokeM <- vitalGender %>% filter(Topic == "Stroke", Gender == "Male") %>%
+  group_by(LocationAbbr) %>% summarise(avg_deathRate = mean(Data_Value)) %>% rename(state = LocationAbbr)
+
+#create a data fram with the us states
+us_states <- us_map("states")
+#Rename abbr to state
+us_states <- us_states %>% rename(state=abbr)
+#create data frame with mortality rate for mapping
+strokeMaleMap <- left_join(us_states, strokeM)
+#find centroid and bind to death rate
+centroid <- aggregate(data=strokeMaleMap,
+                      cbind(x, y) ~ avg_deathRate, FUN=mean)
+#plot avg  death rate in us state map
+strokeMaleMap %>%
+  ggplot(aes(x,y, group=group, fill=avg_deathRate)) + 
+  geom_polygon(color = "darkgray", size = 0.5)+
+  scale_fill_gradient(low = "orange", 
+                      high = "purple",
+                      na.value = "gray") +
+  guides(fill= guide_legend(nrow=1)) +
+  geom_text(mapping = aes(x,y, label=round(avg_deathRate)), color = "black",
+            data = centroid,
+            inherit.aes = FALSE )+
+  theme_map()+
+  coord_equal()+
+  labs(title = " Average Death Rate for stroke in Males", fill = "Rate per 100,000") +
+  theme(plot.title = element_text(hjust=0.5),
+        legend.position = "bottom")
+
+strokeF <- vitalGender %>% filter(Topic == "Stroke", Gender == "Female")
 
 
 
