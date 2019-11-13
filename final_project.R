@@ -346,15 +346,16 @@ stroke_gender <- vitalGender %>%
   filter(Topic == "Stroke") %>% group_by(Gender) %>%
   summarise(avg_deathRate = mean(Data_Value))
 
+
 cardioJoin <- mycardio %>%
   group_by(Gender, Smoke, Alcohol, Active ,Cardio) %>% summarise(n = n())
 
 
 stroke_lifestyle <- left_join(cardioJoin, stroke_gender)
 
-plot_stroke_m <- stroke_lifestyle %>% filter(Gender=="Female") %>%
+plot_stroke_f <- stroke_lifestyle %>% filter(Gender=="Female") %>%
   arrange(desc(n)) %>% head(1)
-plot_stroke_f <- stroke_lifestyle %>% filter(Gender=="Male") %>%
+plot_stroke_m <- stroke_lifestyle %>% filter(Gender=="Male") %>%
   arrange(desc(n)) %>% head(1)
 
 plot_stroke <- bind_rows(plot_stroke_m,plot_stroke_f)
@@ -398,4 +399,17 @@ strokeF <- vitalGender %>% filter(Topic == "Stroke", Gender == "Female")
 
 
 
-#### Which vital factor contributes the most to mortality rate? ####
+#### Which vital factor contributes the most to mortality rate by age group? ####
+vitalAge <- vital%>%
+  select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
+         HighConfidenceLimit,LowConfidenceLimit,Data_Value, Data_Value_Type) %>% 
+  arrange(Topic) %>% 
+  na.omit()
+vitalAge <- vitalAge %>% filter(Break_Out_Category=="Age") %>%
+  select(-Break_Out_Category) %>% rename(Age = Break_Out)
+
+t <- vitalAge %>% filter(                   Topic == "Stroke", Data_Value_Type == "Crude",
+                         Age == "25-44") %>% group_by(LocationAbbr) %>%
+  mutate(avg = mean(Data_Value)) %>%
+  distinct(LocationAbbr, .keep_all = TRUE) %>% select(-Data_Value)
+
