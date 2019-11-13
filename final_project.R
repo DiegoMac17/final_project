@@ -13,13 +13,15 @@ library(usmap)
 library(maps)
 library(cowplot)
 
+
 ####read data files####
 cardio <- read_csv2("data/cardio_train.csv")
 vital <- read_csv("data/Data1.csv")
 
 
 
-#wrangle the data 
+
+#wrangle the data####
 rate<- vital%>%
   select(GeoLocation,LocationAbbr,Topic,Data_Value_Type,Data_Value,Break_Out_Category,Break_Out) %>%
   mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
@@ -31,6 +33,10 @@ rate<- vital%>%
   mutate(Latitude = as.numeric(Latitude),
          Longitude = as.numeric(Longitude)) %>% 
   na.omit()
+
+
+
+####Which states have the highest average mortality rates for each topic####
 
 #average mortality rate for each state by topic
 state_avg <- rate %>% 
@@ -134,6 +140,8 @@ state_avg_highest%>%
 #We can decide which is a better visualization
 
 
+
+####Which gender has the highest average mortality rate for each topic####
 #find the average mortality rate among genders for each topic
 Gender_average <- rate%>% 
   filter(Break_Out_Category=="Gender") %>%
@@ -156,7 +164,8 @@ Gender_average %>%
 temp %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
   addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
 
-###################
+
+#####Isaiah's Code####
 
 #Cardio Code
 mycardio <- cardio %>%
@@ -304,6 +313,10 @@ temp2 %>%
 
 
 
+
+
+
+
 ####Joining and mapping####
 vitalGender <- vital%>%
   select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
@@ -327,6 +340,7 @@ vitalGender <- vitalGender%>% mutate(GeoLocation = str_remove_all(GeoLocation, "
 #strokeM %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
 #  addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
 
+
 ####What lifestyle combination has the highest mortality rates for stroke in men and female ?####
 stroke_gender <- vitalGender %>%
   filter(Topic == "Stroke") %>% group_by(Gender) %>%
@@ -347,6 +361,7 @@ plot_stroke <- bind_rows(plot_stroke_m,plot_stroke_f)
 
 plot_stroke %>% ggplot() +
   geom_col(aes(x=Gender, y= n, fill = avg_deathRate))
+
 
 
 #### map of the us for stroke avg death rate ####
@@ -380,6 +395,7 @@ strokeMaleMap %>%
         legend.position = "bottom")
 
 strokeF <- vitalGender %>% filter(Topic == "Stroke", Gender == "Female")
+
 
 
 #### Which vital factor contributes the most to mortality rate? ####
