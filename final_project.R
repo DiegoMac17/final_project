@@ -382,4 +382,4 @@ strokeMaleMap %>%
 strokeF <- vitalGender %>% filter(Topic == "Stroke", Gender == "Female")
 
 
-
+#### Which vital factor contributes the most to mortality rate? ####
