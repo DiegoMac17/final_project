@@ -246,6 +246,7 @@ percentLife$Occurance <- NULL
 
 
 percentLife %>%
+  filter(Lifestyle == "Active" | Lifestyle == "Alcohol" | Lifestyle == "Smoke") %>%
   ggplot() +
   geom_bar(mapping = aes(x = Gender, y = percent, fill = Lifestyle), stat = "identity") +
   facet_wrap(~Lifestyle, scales = "free_y")
@@ -253,19 +254,31 @@ percentLife %>%
 
 #People with VERY HIGH weights have distolic and systolic values that are off the charts
 
-mycolors <- palette(brewer.pal(n=3, name="Set1"))
+#mycolors <- palette(brewer.pal(n=2, name="Set1"))
+mycolors <- c("green", "red")
+
 
 mycardio %>%
-  filter(`Diastolic blood pressure` < 500 & `Systolic blood pressure` < 400 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
+  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
   filter(Weight < 500) %>%
   ggplot() +
-  geom_point(mapping = aes(x = Weight,
-                           y = `Systolic blood pressure`,
-                           color = Weight),
-             alpha = 0.1,
-             position= "dodge") +
-  scale_fill_manual(values = mycolors)
+  geom_point(mapping = aes(x = `Systolic blood pressure`,
+                           y = `Diastolic blood pressure`,
+                           color = Cardio),
+             alpha = 0.1) +
+  scale_color_manual(values = mycolors) +
+  labs(title = "Blood Pressure with Cardiovascular Disease")
 
+mycardio %>%
+  filter(Cholesterol == "1" & Glucose == "1" & `Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
+  filter(Weight < 500) %>%
+  ggplot() +
+  geom_point(mapping = aes(x = `Systolic blood pressure`,
+                           y = `Diastolic blood pressure`,
+                           color = Cardio),
+             alpha = 0.1) +
+  scale_color_manual(values = mycolors) +
+  labs(title = "Blood Pressure with Cardiovascular Disease")
 
 mycardio %>%
   filter(`Diastolic blood pressure` < 1000) %>%
