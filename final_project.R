@@ -261,8 +261,15 @@ percentLife$Occurance <- NULL
 percentLife %>%
   filter(Lifestyle == "Active" | Lifestyle == "Alcohol" | Lifestyle == "Smoke") %>%
   ggplot() +
-  geom_bar(mapping = aes(x = Gender, y = percent, fill = Lifestyle), stat = "identity") +
+  geom_bar(mapping = aes(x = Gender, y = percent, fill = Lifestyle), stat = "identity")
   facet_wrap(~Lifestyle, scales = "free_y")
+
+percentLife %>%
+  filter(Lifestyle == "Cardio") %>%
+  ggplot() +
+  geom_bar(mapping = aes(x = Gender, y = percent, fill = percent), stat = "identity") +
+  scale_fill_distiller(palette = "Set1") +
+  labs(title = "Percentage of Gender with Cardiovascular Disease")
   
 
 #People with VERY HIGH weights have distolic and systolic values that are off the charts
