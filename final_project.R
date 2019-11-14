@@ -428,8 +428,10 @@ vitalAge <- vital%>%
 vitalAge <- vitalAge %>% filter(Break_Out_Category=="Age") %>%
   select(-Break_Out_Category) %>% rename(Age = Break_Out)
 
-t <- vitalAge %>% filter(                   Topic == "Stroke", Data_Value_Type == "Crude",
+t <- vitalAge %>% filter(Topic == "Stroke", Data_Value_Type == "Crude",
                          Age == "25-44") %>% group_by(LocationAbbr) %>%
   mutate(avg = mean(Data_Value)) %>%
   distinct(LocationAbbr, .keep_all = TRUE) %>% select(-Data_Value)
 
+te <- mycardio %>% filter(Cardio == "Yes")
+t1 <- left_join(stroke_gender,te)
