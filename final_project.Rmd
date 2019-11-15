@@ -80,7 +80,7 @@ percentLife %>%
   filter(Lifestyle == "Cardio") %>%
   ggplot() +
   geom_bar(mapping = aes(x = Gender, y = percent, fill = percent), stat = "identity") +
-  scale_fill_distiller(palette = "Set1") +
+  scale_fill_distiller(palette = "Spectral") +
   labs(title = "Percentage of Gender with Cardiovascular Disease")
 ```
 
