@@ -261,7 +261,7 @@ percentLife$Occurance <- NULL
 percentLife %>%
   filter(Lifestyle == "Active" | Lifestyle == "Alcohol" | Lifestyle == "Smoke") %>%
   ggplot() +
-  geom_bar(mapping = aes(x = Gender, y = percent, fill = Lifestyle), stat = "identity")
+  geom_bar(mapping = aes(x = Gender, y = percent, fill = Lifestyle), stat = "identity") +
   facet_wrap(~Lifestyle, scales = "free_y")
 
 percentLife %>%
