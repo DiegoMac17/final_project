@@ -304,23 +304,7 @@ cardio %>%
   top_n(10)
 
 
-temp %>% 
-  filter(Topic=="Acute Myocardial Infarction (Heart Attack)" & Year==2000 & LocationAbbr=="AL") %>% 
-  view()
-temp1 <-  temp%>% 
-  group_by(LocationAbbr,Topic) %>% 
-  summarise(avg=mean(Data_Value)) %>% 
-  arrange(Topic)
 
-temp2 <- temp1 %>% 
-  group_by(Topic) %>% 
-  top_n(5,avg)
-temp2 %>% 
-  ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=Topic))+
-  coord_flip()+
-  labs(title = "Coronary Heart Disease")+
-  facet_wrap(~Topic,scales = "free",ncol = 3)
 
 
 
@@ -372,7 +356,7 @@ plot_stroke_m <- stroke_lifestyle %>% filter(Gender=="Male") %>%
 plot_stroke <- bind_rows(plot_stroke_m,plot_stroke_f)
 
 plot_stroke %>% ggplot() +
-  geom_point(aes(x=Gender, y= n, fill = avg_deathRate))
+  geom_col(aes(x=Gender, y= n, fill = avg_deathRate))
 
 
 
@@ -440,3 +424,23 @@ mycardioAgeGroup <- mycardioAgeGroup %>% group_by(Age) %>% summarise(cardio_avg 
 vital_cardio_join_age <- left_join(vitalAgeRelevant,mycardioAgeGroup)
 
 #### Which vital factor contributes the most to mortality rate by gender? ####
+
+age <- vitalAge %>% 
+  group_by(Topic,Age) %>% 
+  summarise(avg=mean(Data_Value))
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
