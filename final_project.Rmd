@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## R Markdown
 
-```{r load-libraries, include=FALSE}
+```{r load-libraries, message=FALSE}
 library(tidyverse)
 library(leaflet)
 library(RColorBrewer)
@@ -22,7 +22,7 @@ library(cowplot)
 ```
 
 
-```{r readingData, echo=FALSE}
+```{r readingData, echo=FALSE, warning=FALSE, message=FALSE}
 cardio <- read_csv2("data/cardio_train.csv")
 vital <- read_csv("data/Data1.csv")
 ```
