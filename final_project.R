@@ -348,8 +348,7 @@ vitalGender <- vitalGender%>% mutate(GeoLocation = str_remove_all(GeoLocation, "
          Longitude = as.numeric(Longitude)) %>% 
   na.omit()
 
-#strokeM %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
-#  addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
+
 
 
 ####What lifestyle combination has the highest mortality rates for stroke in men and female ?####
@@ -439,4 +438,21 @@ mycardioAgeGroup <- mycardioAgeGroup %>% group_by(Age) %>% summarise(cardio_avg 
 
 vital_cardio_join_age <- left_join(vitalAgeRelevant,mycardioAgeGroup)
 
-#### Which vital factor contributes the most to mortality rate by gender? ####
+#### What is the average mortality by state leaflet map? ####
+vital_avg_state_all <- vital%>%
+  select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
+         HighConfidenceLimit,LowConfidenceLimit,Data_Value, Data_Value_Type) %>% 
+  arrange(Topic) %>% 
+  na.omit()
+vital_avg_state_all <- vital_avg_state_all %>%
+  group_by(LocationAbbr) %>% mutate(avg = mean(Data_Value)) %>%
+  distinct(LocationAbbr, .keep_all = TRUE)
+vital_avg_state_all <- vital_avg_state_all%>% mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
+                                     GeoLocation = str_remove_all(GeoLocation, "\\)")) %>% 
+  separate(GeoLocation,into = c("Latitude", "Longitude"),  ",") %>% 
+  mutate(Latitude = as.numeric(Latitude),
+         Longitude = as.numeric(Longitude)) %>% 
+  na.omit()
+
+vital_avg_state_all %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
+  addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
