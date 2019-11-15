@@ -331,24 +331,22 @@ temp2 %>%
 
 
 ####Joining and mapping####
+#Select relevant variables 
 vitalGender <- vital%>%
   select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
          HighConfidenceLimit,LowConfidenceLimit,Data_Value) %>% 
   arrange(Topic) %>% 
   na.omit()
+#Use only the gender break out
 vitalGender <- vitalGender %>% filter(Break_Out_Category=="Gender") %>%
   select(-Break_Out_Category) %>% rename(Gender = Break_Out)
-
+#Divide geolocation into latitude and longitude
 vitalGender <- vitalGender%>% mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
                                      GeoLocation = str_remove_all(GeoLocation, "\\)")) %>% 
   separate(GeoLocation,into = c("Latitude", "Longitude"),  ",") %>% 
   mutate(Latitude = as.numeric(Latitude),
          Longitude = as.numeric(Longitude)) %>% 
   na.omit()
-
-#cardioVital <- left_join(vitalGender, mycardio, by ="Gender")
-#mycardio
-
 
 #strokeM %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
 #  addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
@@ -374,7 +372,7 @@ plot_stroke_m <- stroke_lifestyle %>% filter(Gender=="Male") %>%
 plot_stroke <- bind_rows(plot_stroke_m,plot_stroke_f)
 
 plot_stroke %>% ggplot() +
-  geom_col(aes(x=Gender, y= n, fill = avg_deathRate))
+  geom_point(aes(x=Gender, y= n, fill = avg_deathRate))
 
 
 
@@ -413,18 +411,32 @@ strokeF <- vitalGender %>% filter(Topic == "Stroke", Gender == "Female")
 
 
 #### Which vital factor contributes the most to mortality rate by age group? ####
+#Relation between age groups and life styles and cardivascular disease
+
+#Select relevant variables 
 vitalAge <- vital%>%
   select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
          HighConfidenceLimit,LowConfidenceLimit,Data_Value, Data_Value_Type) %>% 
   arrange(Topic) %>% 
   na.omit()
+#Use only age break out category
 vitalAge <- vitalAge %>% filter(Break_Out_Category=="Age") %>%
   select(-Break_Out_Category) %>% rename(Age = Break_Out)
 
-t <- vitalAge %>% filter(Topic == "Stroke", Data_Value_Type == "Crude",
-                         Age == "25-44") %>% group_by(LocationAbbr) %>%
-  mutate(avg = mean(Data_Value)) %>%
-  distinct(LocationAbbr, .keep_all = TRUE) %>% select(-Data_Value)
+#Filter for age groups that match cardio data set and obtain mean death rate
+vitalAgeRelevant <- vitalAge %>% filter(Data_Value_Type == "Crude",
+                                        Age == "25-44"| Age == "45-64" | Age == "65+") %>% group_by(Age) %>%
+  mutate(percent_avg = mean(Data_Value)/1000) %>%
+  distinct(Age, .keep_all = TRUE) %>% select(Age,percent_avg)
+#create age groups for my cardio
+#mycardioAgeGroup = cut(mycardio$Age,c(0,25,45,65,100))
+a = c(0, 24);b = c(25,44);c = c(45, 64);d = c(65, 100);
+my_bins = matrix(rbind(a, b, c, d), ncol=2)
+shx <- shingle(mycardio$Age, intervals=my_bins)
+mycardioAgeGroup <- mycardio %>% arrange(Age) %>% mutate(Age = as.character(shingle(Age,intervals = my_bins)))
 
-te <- mycardio %>% filter(Cardio == "Yes")
-t1 <- left_join(stroke_gender,te)
+mycardioAgeGroup <- mycardioAgeGroup %>% group_by(Age) %>% summarise(cardio_avg = mean(Cardio)*100)
+
+vital_cardio_join_age <- left_join(vitalAgeRelevant,mycardioAgeGroup)
+
+#### Which vital factor contributes the most to mortality rate by gender? ####
