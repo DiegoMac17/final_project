@@ -40,7 +40,7 @@ rate<- vital%>%
 
 #average mortality rate for each state by topic
 state_avg <- rate %>% 
-  filter(Data_Value_Type=="Age-Standardized") %>% 
+  filter(Data_Value_Type=="Age-Standardized",Topic!="Major Cardiovascular Disease") %>% 
   group_by(LocationAbbr,Topic) %>% 
   summarise(avg=mean(Data_Value)) %>% 
   mutate(pct=avg/100000*100)
@@ -49,13 +49,12 @@ state_avg <- rate %>%
 state_avg_highest<- state_avg %>% 
   group_by(Topic) %>% 
   top_n(5,pct) %>% 
-  arrange(desc(pct))
+  arrange(Topic,desc(pct))
 
 #plot of the top 5 states in every topic 
-state_avg_highest%>% 
+state_avg_highest%>%
 ggplot()+
 geom_col(aes(reorder(LocationAbbr,pct),pct,fill=Topic),position = "dodge")+
-  coord_flip()+
   facet_wrap(~Topic,ncol = 2,scales = "free")+
   labs(title = "Average Mortality Among States",
        x=element_blank())+
@@ -65,25 +64,25 @@ geom_col(aes(reorder(LocationAbbr,pct),pct,fill=Topic),position = "dodge")+
 
 
 
-
 ####Which gender has the highest average mortality rate for each topic####
 #find the average mortality rate among genders for each topic
 Gender_average <- rate%>% 
-  filter(Break_Out_Category=="Gender") %>%
+  filter(Break_Out_Category=="Gender",Topic!="Major Cardiovascular Disease",Data_Value_Type=="Age-Standardized") %>%
   select(-Break_Out_Category) %>% 
   rename(Gender = Break_Out) %>% 
-  filter(Data_Value_Type=="Age-Standardized") %>% 
-  group_by(Topic,Gender,Data_Value_Type) %>% 
+  group_by(Topic,Gender) %>% 
   summarise(avg=mean(Data_Value)) %>% 
-  mutate(pct=avg/100000*100)
+  mutate(pct=avg/100000*100) %>% 
+  arrange(Topic,desc(pct))
 
 #Plot the average mortality for each gender by topic
 Gender_average %>% 
   ggplot()+
-  geom_col(aes(Gender,pct,fill=Topic),position = "dodge")+
-  facet_wrap(~Topic,scales = "free")+
+  geom_col(aes(Gender,pct,fill=Topic))+
+  facet_wrap(~Topic,scales = "free_y")+
   labs(title = "Average Mortality among Gender")+
-  theme(plot.title = element_text(hjust = 0.5,size = 25))
+  theme(plot.title = element_text(hjust = 0.5,size = 25))+
+  guides(fill=FALSE)
 
 
 
