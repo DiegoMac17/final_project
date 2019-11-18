@@ -268,7 +268,7 @@ percentLife %>%
   filter(Lifestyle == "Cardio") %>%
   ggplot() +
   geom_bar(mapping = aes(x = Gender, y = percent, fill = percent), stat = "identity") +
-  scale_fill_distiller(palette = "Set1") +
+  scale_fill_distiller(palette = "Spectral") +
   labs(title = "Percentage of Gender with Cardiovascular Disease")
   
 
@@ -289,16 +289,109 @@ mycardio %>%
   scale_color_manual(values = mycolors) +
   labs(title = "Blood Pressure with Cardiovascular Disease")
 
+#Flipping Systolic and Diastolic
 mycardio %>%
-  filter(Cholesterol == "1" & Glucose == "1" & `Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
+  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
   filter(Weight < 500) %>%
   ggplot() +
-  geom_point(mapping = aes(x = `Systolic blood pressure`,
-                           y = `Diastolic blood pressure`,
+  geom_point(mapping = aes(x = `Diastolic blood pressure`,
+                           y = `Systolic blood pressure`,
                            color = Cardio),
              alpha = 0.1) +
   scale_color_manual(values = mycolors) +
   labs(title = "Blood Pressure with Cardiovascular Disease")
+
+#Weight
+mycardio %>%
+  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
+  filter(Weight < 500) %>%
+  ggplot() +
+  geom_point(mapping = aes(x = Weight,
+                           y = `Systolic blood pressure`,
+                           color = Cardio),
+             alpha = 0.1) +
+  scale_color_manual(values = mycolors) +
+  labs(title = "Blood Pressure with Cardiovascular Disease")
+
+
+##########
+
+mycardio %>%
+  filter(Weight < 400) %>%
+  ggplot() +
+  geom_histogram(mapping = aes(x = Weight), bins = 80)
+
+mycardio %>%
+  ggplot() +
+  geom_histogram(mapping = aes(x = Age), bins = 8)
+
+mycardio %>%
+  filter(Age > 35) %>%
+  group_by(Age) %>%
+  summarise(n = n()) %>%
+  ggplot() +
+  geom_point(mapping = aes(x = Age, y = n, color = n))
+
+
+
+facetCardio <- mycardio %>%
+  select(Glucose, Cholesterol, Gender, Smoke:Cardio) %>%
+  gather("Lifestyle", "Occurance", -Glucose, -Cholesterol, -Gender) %>%
+  group_by(Glucose, Cholesterol, Gender, Lifestyle, Occurance) %>%
+  count()
+
+actFe <- facetCardio %>%
+  filter(Gender == "Female" & Lifestyle == "Active" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+alcFe <- facetCardio %>%
+  filter(Gender == "Female" & Lifestyle == "Alcohol" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+cardFe <- facetCardio %>%
+  filter(Gender == "Female" & Lifestyle == "Cardio" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+smoFe <- facetCardio %>%
+  filter(Gender == "Female" & Lifestyle == "Smoke" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+
+actMa <- facetCardio %>%
+  filter(Gender == "Male" & Lifestyle == "Active" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+alcMa <- facetCardio %>%
+  filter(Gender == "Male" & Lifestyle == "Alcohol" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+cardMa <- facetCardio %>%
+  filter(Gender == "Male" & Lifestyle == "Cardio" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+smoMa <- facetCardio %>%
+  filter(Gender == "Male" & Lifestyle == "Smoke" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+
+percentLife <- bind_rows(actFe, actMa, alcFe, alcMa, cardFe, cardMa, smoFe, smoMa)
+percentLife$Occurance <- NULL
+
+
+##########
+
+
+
+
+
+
+
+
+#Cholesterol and Glucose
+#Does high cholesteral/glucose increase rate of cardiovascular disease
+myNewCardio <- mycardio %>%
+  filter(Cholesterol == "3" & Cardio == "Yes")
+
 
 mycardio %>%
   filter(`Diastolic blood pressure` < 1000) %>%
@@ -311,23 +404,23 @@ cardio %>%
   top_n(10)
 
 
-temp %>% 
-  filter(Topic=="Acute Myocardial Infarction (Heart Attack)" & Year==2000 & LocationAbbr=="AL") %>% 
-  view()
-temp1 <-  temp%>% 
-  group_by(LocationAbbr,Topic) %>% 
-  summarise(avg=mean(Data_Value)) %>% 
-  arrange(Topic)
-
-temp2 <- temp1 %>% 
-  group_by(Topic) %>% 
-  top_n(5,avg)
-temp2 %>% 
-  ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=Topic))+
-  coord_flip()+
-  labs(title = "Coronary Heart Disease")+
-  facet_wrap(~Topic,scales = "free",ncol = 3)
+# temp %>% 
+#   filter(Topic=="Acute Myocardial Infarction (Heart Attack)" & Year==2000 & LocationAbbr=="AL") %>% 
+#   view()
+# temp1 <-  temp%>% 
+#   group_by(LocationAbbr,Topic) %>% 
+#   summarise(avg=mean(Data_Value)) %>% 
+#   arrange(Topic)
+# 
+# temp2 <- temp1 %>% 
+#   group_by(Topic) %>% 
+#   top_n(5,avg)
+# temp2 %>% 
+#   ggplot()+
+#   geom_col(aes(reorder(LocationAbbr,avg),avg,fill=Topic))+
+#   coord_flip()+
+#   labs(title = "Coronary Heart Disease")+
+#   facet_wrap(~Topic,scales = "free",ncol = 3)
 
 
 
@@ -359,7 +452,7 @@ vitalGender <- vitalGender%>% mutate(GeoLocation = str_remove_all(GeoLocation, "
 #  addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
 
 
-####What lifestyle combination has the highest mortality rates for stroke in men and female ?####
+####What lifestyle combination has the highest mortality rates for stroke in male and female ?####
 stroke_gender <- vitalGender %>%
   filter(Topic == "Stroke") %>% group_by(Gender) %>%
   summarise(avg_deathRate = mean(Data_Value))
@@ -401,7 +494,7 @@ strokeMaleMap %>%
   ggplot(aes(x,y, group=group, fill=avg_deathRate)) + 
   geom_polygon(color = "darkgray", size = 0.5)+
   scale_fill_gradient(low = "orange", 
-                      high = "purple",
+                      high = "blue",
                       na.value = "gray") +
   guides(fill= guide_legend(nrow=1)) +
   geom_text(mapping = aes(x,y, label=round(avg_deathRate)), color = "black",
