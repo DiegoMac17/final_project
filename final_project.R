@@ -344,18 +344,15 @@ vitalAgeRelevant <- vitalAge %>% filter(Data_Value_Type == "Crude",
                                         Age == "25-44"| Age == "45-64" | Age == "65+") %>% group_by(Age) %>%
   mutate(percent_avg = mean(Data_Value)/1000) %>%
   distinct(Age, .keep_all = TRUE) %>% select(Age,percent_avg)
-#create age groups for my cardio
-#mycardioAgeGroup = cut(mycardio$Age,c(0,25,45,65,100))
-a = c(0, 24);b = c(25,44);c = c(45, 64);d = c(65, 100);
-my_bins = matrix(rbind(a, b, c, d), ncol=2)
-shx <- shingle(mycardio$Age, intervals=my_bins)
-mycardioAgeGroup <- mycardio %>% arrange(Age) %>% mutate(Age = as.character(shingle(Age,intervals = my_bins)))
+
+mycardioAgeGroup <- mycardio %>%
+  mutate(Age = if_else(condition = Age<44, true = "25-44", false ="45-64"))
 
 mycardioAgeGroup <- mycardioAgeGroup %>% group_by(Age) %>% summarise(cardio_avg = mean(Cardio)*100)
 
 vital_cardio_join_age <- left_join(vitalAgeRelevant,mycardioAgeGroup)
 
-<<<<<<< HEAD
+
 #### What is the average mortality by state leaflet map? ####
 vital_avg_state_all <- vital%>%
   select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
@@ -374,7 +371,7 @@ vital_avg_state_all <- vital_avg_state_all%>% mutate(GeoLocation = str_remove_al
 
 vital_avg_state_all %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
   addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
-=======
+
 #### Which vital factor contributes the most to mortality rate by gender? ####
 
 age <- vitalAge %>% 
@@ -389,10 +386,3 @@ age <- vitalAge %>%
 
 
 
-
-
-
-
-
-
->>>>>>> df3f8ec5d768461d93e0e1075560fc05e7dd10d2
