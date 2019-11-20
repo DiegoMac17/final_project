@@ -341,17 +341,31 @@ vitalAge <- vitalAge %>% filter(Break_Out_Category=="Age") %>%
 
 #Filter for age groups that match cardio data set and obtain mean death rate
 vitalAgeRelevant <- vitalAge %>% filter(Data_Value_Type == "Crude",
-                                        Age == "25-44"| Age == "45-64" | Age == "65+") %>% group_by(Age) %>%
+                                        Age == "25-44"| Age == "45-64" | Age == "18-24") %>% group_by(Age) %>%
   mutate(percent_avg = mean(Data_Value)/1000) %>%
   distinct(Age, .keep_all = TRUE) %>% select(Age,percent_avg)
 
 mycardioAgeGroup <- mycardio %>%
   mutate(Age = if_else(condition = Age<44, true = "25-44", false ="45-64"))
 
-mycardioAgeGroup <- mycardioAgeGroup %>% group_by(Age) %>% summarise(cardio_avg = mean(Cardio)*100)
+mycardioAgeGroup <- mycardioAgeGroup %>% group_by(Age) %>%
+  summarise(cardio_pavg = mean(Cardio)/100,
+            alcohol_pavg = mean(Alcohol)/100,
+            active_pavg = mean(Active)/100,
+            smoke_pavg = mean(Smoke)/100)
 
 vital_cardio_join_age <- left_join(vitalAgeRelevant,mycardioAgeGroup)
 
+vital_cardio_join_44 <- vital_cardio_join_age %>%
+  filter(Age=="45-64") %>%
+  gather(AgeR,Pavg)
+
+vital_cardio_join_age %>% ggplot()+
+  geom_line(aes(Age, percent_avg)) +
+  geom_line(aes(Age, cardio_pavg)) +
+  geom_line(aes(Age, active_pavg)) +
+  geom_line(aes(Age, smoke_pavg)) +
+  geom_line(aes(Age, active_pavg)) +
 
 #### What is the average mortality by state leaflet map? ####
 vital_avg_state_all <- vital%>%
