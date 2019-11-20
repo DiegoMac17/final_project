@@ -335,6 +335,27 @@ vitalAge <- vital%>%
          HighConfidenceLimit,LowConfidenceLimit,Data_Value, Data_Value_Type) %>% 
   arrange(Topic) %>% 
   na.omit()
+#prepare cardio data set
+cardio_j <- cardio %>%
+  rename("ID" = id,
+         "Age" = age,
+         "Gender" = gender,
+         "Height" = height,
+         "Weight" = weight,
+         "Systolic blood pressure" = ap_hi,
+         "Diastolic blood pressure" = ap_lo,
+         "Cholesterol" = cholesterol,
+         "Glucose" = gluc,
+         "Smoke" = smoke,
+         "Alcohol" = alco,
+         "Active" = active,
+         "Cardio" = cardio)
+cardio_j <- cardio_j %>%
+  mutate(Age = as.numeric(Age)/365) %>%
+  mutate(Gender = case_when(Gender == "1" ~ "Female", 
+                            Gender == "2" ~ "Male")) %>%
+  mutate(Weight = as.numeric(Weight)*2.205/10)
+
 #Use only age break out category
 vitalAge <- vitalAge %>% filter(Break_Out_Category=="Age") %>%
   select(-Break_Out_Category) %>% rename(Age = Break_Out)
@@ -345,7 +366,7 @@ vitalAgeRelevant <- vitalAge %>% filter(Data_Value_Type == "Crude",
   mutate(percent_avg = mean(Data_Value)/1000) %>%
   distinct(Age, .keep_all = TRUE) %>% select(Age,percent_avg)
 
-mycardioAgeGroup <- mycardio %>%
+mycardioAgeGroup <- cardio_j %>%
   mutate(Age = if_else(condition = Age<44, true = "25-44", false ="45-64"))
 
 mycardioAgeGroup <- mycardioAgeGroup %>% group_by(Age) %>%
@@ -384,7 +405,8 @@ vital_avg_state_all <- vital_avg_state_all%>% mutate(GeoLocation = str_remove_al
   na.omit()
 
 vital_avg_state_all %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
-  addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
+  addTiles() %>% setView(-98.00,38.71,zoom=4) %>%
+  addMarkers(~Longitude, ~Latitude)
 
 #### Which vital factor contributes the most to mortality rate by gender? ####
 
