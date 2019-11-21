@@ -267,7 +267,7 @@ vitalGender <- vitalGender%>% mutate(GeoLocation = str_remove_all(GeoLocation, "
 
 
 
-
+#Probably delete this section
 ####What lifestyle combination has the highest mortality rates for stroke in men and female ?####
 stroke_gender <- vitalGender %>%
   filter(Topic == "Stroke") %>% group_by(Gender) %>%
@@ -292,7 +292,9 @@ plot_stroke %>% ggplot() +
 
 
 
-#### map of the us for stroke avg death rate ####
+
+
+#### map of the us for stroke avg death rate (heat map) ####
 strokeM <- vitalGender %>% filter(Topic == "Stroke", Gender == "Male",Data_Value_Type=="Age-Standardized") %>%
   group_by(LocationAbbr) %>% summarise(avg_deathRate = mean(Data_Value)) %>% rename(state = LocationAbbr)
 
@@ -413,7 +415,11 @@ state_avg_leaflet <- rate %>%
   group_by(Longitude,Latitude,LocationAbbr,Topic) %>% 
   summarise(avg=mean(Data_Value)) %>% 
   mutate(pct=avg/100000*100)
-state_avg_leaflet <- state_avg_leaflet %>% spread(Topic, avg)
+state_avg_leaflet <- state_avg_leaflet %>% spread(Topic, avg) 
+
+#not working yet
+t <- state_avg_leaflet %>%
+  group_by(LocationAbbr) %>% combine()
 
 state_label <- sprintf("<b>%s</b><br />Coro %s<br/ >HA %s<br/ >HD %s<br/ >HF %s<br/ >S %s",
                        state_avg_leaflet$LocationAbbr,
