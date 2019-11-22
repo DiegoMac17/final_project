@@ -80,15 +80,15 @@ Gender_average %>%
   ggplot()+
   geom_col(aes(Gender,pct,fill=Topic))+
   facet_wrap(~Topic,scales = "free_y")+
-  labs(title = "Average Mortality among Gender")+
+  labs(title = "Average Mortality among Gender",
+       x=element_blank())+
   theme(plot.title = element_text(hjust = 0.5,size = 25))+
   guides(fill=FALSE)
 
 
 
 
-temp %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
-  addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
+
 
 
 #####Isaiah's Code####
@@ -412,9 +412,9 @@ vital_avg_state_all <- vital_avg_state_all%>% mutate(GeoLocation = str_remove_al
 
 state_avg_leaflet <- rate %>% 
   filter(Data_Value_Type=="Age-Standardized",Topic!="Major Cardiovascular Disease") %>% 
-  group_by(Longitude,Latitude,LocationAbbr,Topic) %>% 
+  group_by(Longitude,Latitude,State,Topic) %>% 
   summarise(avg=mean(Data_Value)) %>% 
-  mutate(pct=avg/100000*100)
+  mutate(pct=avg/1000)
 state_avg_leaflet <- state_avg_leaflet %>% select(-pct) %>%
   spread(Topic, avg) %>% mutate(`Coronary Heart Disease` = round(`Coronary Heart Disease`,2),
                                 `Heart Attack` = round(`Heart Attack`,2),
@@ -423,7 +423,7 @@ state_avg_leaflet <- state_avg_leaflet %>% select(-pct) %>%
                                 `Stroke` = round(`Stroke`, 2))
 
 state_label <- sprintf("<b>Average mortality rate in: %s</b><br />Coronary Heart Disease:  %s<br/ >Heart Attack: %s<br/ >Heart Disease: %s<br/ >Heart Failure: %s<br/ >Stroke: %s",
-                       state_avg_leaflet$LocationAbbr,
+                       state_avg_leaflet$State,
                     state_avg_leaflet$`Coronary Heart Disease`,
                     state_avg_leaflet$`Heart Attack`,
                     state_avg_leaflet$`Heart Disease`,
