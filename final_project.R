@@ -53,15 +53,14 @@ state_avg_highest<- state_avg %>%
   arrange(Topic,desc(pct))
 
 #plot of the top 5 states in every topic 
-state_avg_highest%>%
-ggplot()+
-geom_col(aes(reorder(State,pct),pct,fill=Topic),position = "dodge")+
-  facet_wrap(~Topic,ncol = 2,scales = "free")+
+state_avg_highest %>% 
+  ggplot()+
+  geom_col(aes(reorder(State,pct),pct,fill=Topic))+
+  facet_wrap(~Topic,scales = "free")+
+  coord_flip()+
   labs(title = "Average Mortality Among States",
        x=element_blank())+
-  guides(fill=FALSE)+
   theme(plot.title = element_text(hjust = 0.5))
-
 
 
 
