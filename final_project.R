@@ -257,7 +257,7 @@ vitalGender <- vitalGender%>% mutate(GeoLocation = str_remove_all(GeoLocation, "
 
 
 #### map of the us for stroke avg death rate (heat map) ####
-strokeM <- vitalGender %>% filter(Topic == "Stroke", Gender == "Male",Data_Value_Type=="Age-Standardized") %>%
+strokeM <- vitalGender %>% filter(Data_Value_Type=="Age-Standardized") %>%
   group_by(LocationAbbr) %>% summarise(avg_deathRate = mean(Data_Value)) %>% rename(state = LocationAbbr)
 
 #create a data fram with the us states
@@ -282,11 +282,9 @@ strokeMaleMap %>%
             inherit.aes = FALSE )+
   theme_map()+
   coord_equal()+
-  labs(title = " Average Death Rate for stroke in Males", fill = "Rate per 100,000") +
+  labs(title = " Average Death Rate - Age standarized", fill = "Rate per 100,000") +
   theme(plot.title = element_text(hjust=0.5),
         legend.position = "bottom")
-
-strokeF <- vitalGender %>% filter(Topic == "Stroke", Gender == "Female")
 
 
 
