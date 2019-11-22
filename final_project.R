@@ -32,6 +32,7 @@ rate<- vital%>%
   separate(GeoLocation,into = c("Latitude", "Longitude"),  ",") %>% 
   mutate(Latitude = as.numeric(Latitude),
          Longitude = as.numeric(Longitude)) %>% 
+  rename("State"=LocationAbbr) %>% 
   na.omit()
 
 
@@ -41,9 +42,9 @@ rate<- vital%>%
 #average mortality rate for each state by topic
 state_avg <- rate %>% 
   filter(Data_Value_Type=="Age-Standardized",Topic!="Major Cardiovascular Disease") %>% 
-  group_by(LocationAbbr,Topic) %>% 
+  group_by(Topic,State) %>% 
   summarise(avg=mean(Data_Value)) %>% 
-  mutate(pct=avg/100000*100)
+  mutate(pct=avg/1000)
 
 #top 5 states in mortality by topic
 state_avg_highest<- state_avg %>% 
@@ -54,7 +55,7 @@ state_avg_highest<- state_avg %>%
 #plot of the top 5 states in every topic 
 state_avg_highest%>%
 ggplot()+
-geom_col(aes(reorder(LocationAbbr,pct),pct,fill=Topic),position = "dodge")+
+geom_col(aes(reorder(State,pct),pct,fill=Topic),position = "dodge")+
   facet_wrap(~Topic,ncol = 2,scales = "free")+
   labs(title = "Average Mortality Among States",
        x=element_blank())+
@@ -72,7 +73,7 @@ Gender_average <- rate%>%
   rename(Gender = Break_Out) %>% 
   group_by(Topic,Gender) %>% 
   summarise(avg=mean(Data_Value)) %>% 
-  mutate(pct=avg/100000*100) %>% 
+  mutate(pct=avg/1000) %>% 
   arrange(Topic,desc(pct))
 
 #Plot the average mortality for each gender by topic
