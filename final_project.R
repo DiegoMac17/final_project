@@ -415,13 +415,14 @@ state_avg_leaflet <- rate %>%
   group_by(Longitude,Latitude,LocationAbbr,Topic) %>% 
   summarise(avg=mean(Data_Value)) %>% 
   mutate(pct=avg/100000*100)
-state_avg_leaflet <- state_avg_leaflet %>% spread(Topic, avg) 
+state_avg_leaflet <- state_avg_leaflet %>% select(-pct) %>%
+  spread(Topic, avg) %>% mutate(`Coronary Heart Disease` = round(`Coronary Heart Disease`,2),
+                                `Heart Attack` = round(`Heart Attack`,2),
+                                `Heart Disease` = round(`Heart Disease`,2),
+                                `Heart Failure` = round(`Heart Failure`, 2),
+                                `Stroke` = round(`Stroke`, 2))
 
-#not working yet
-t <- state_avg_leaflet %>%
-  group_by(LocationAbbr) %>% combine()
-
-state_label <- sprintf("<b>%s</b><br />Coro %s<br/ >HA %s<br/ >HD %s<br/ >HF %s<br/ >S %s",
+state_label <- sprintf("<b>Average mortality rate in: %s</b><br />Coronary Heart Disease:  %s<br/ >Heart Attack: %s<br/ >Heart Disease: %s<br/ >Heart Failure: %s<br/ >Stroke: %s",
                        state_avg_leaflet$LocationAbbr,
                     state_avg_leaflet$`Coronary Heart Disease`,
                     state_avg_leaflet$`Heart Attack`,
@@ -430,22 +431,7 @@ state_label <- sprintf("<b>%s</b><br />Coro %s<br/ >HA %s<br/ >HD %s<br/ >HF %s<
                     state_avg_leaflet$`Stroke`) %>%
   lapply(htmltools::HTML)
 
-vital_avg_state_all %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
+state_avg_leaflet %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
   addTiles() %>% setView(-98.00,38.71,zoom=4) %>%
   addMarkers(~Longitude, ~Latitude, label = state_label, popup = state_label)
-
-
-#### Which vital factor contributes the most to mortality rate by gender? ####
-
-age <- vitalAge %>% 
-  group_by(Topic,Age) %>% 
-  summarise(avg=mean(Data_Value))
-  
-  
-
-
-
-
-
-
 
