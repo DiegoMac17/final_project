@@ -21,7 +21,6 @@ library(maps)
 library(cowplot)
 ```
 
-
 ```{r readingData, echo=FALSE, warning=FALSE, message=FALSE}
 cardio <- read_csv2("data/cardio_train.csv")
 vital <- read_csv("data/Data1.csv")
@@ -83,7 +82,6 @@ percentLife %>%
   scale_fill_distiller(palette = "Spectral") +
   labs(title = "Percentage of Gender with Cardiovascular Disease")
 ```
-
 
 ```{r cardioFacet}
 facetCardio <- mycardio %>%
@@ -157,6 +155,8 @@ mycardio %>%
 #   labs(title = "Blood Pressure with Cardiovascular Disease")
 ```
 
+
+## Which states have the highest average mortality from various cardiovascular dieases?
 ```{r vitalHandling, echo=FALSE}
 rate<- vital%>%
   select(GeoLocation,LocationAbbr,Topic,Data_Value_Type,Data_Value,Break_Out_Category,Break_Out) %>%
@@ -168,126 +168,67 @@ rate<- vital%>%
   separate(GeoLocation,into = c("Latitude", "Longitude"),  ",") %>% 
   mutate(Latitude = as.numeric(Latitude),
          Longitude = as.numeric(Longitude)) %>% 
+  rename("State"=LocationAbbr) %>% 
   na.omit()
 ```
 
-```{r vitalGraphs}
-#average mortality rate for each state by topic
+```{r StateMortality, echo=FALSE}
 state_avg <- rate %>% 
-  group_by(LocationAbbr,Topic,Data_Value_Type) %>% 
-  summarise(avg=mean(Data_Value))
+  filter(Data_Value_Type=="Age-Standardized",Topic!="Major Cardiovascular Disease") %>% 
+  group_by(Topic,State) %>% 
+  summarise(avg=mean(Data_Value)) %>% 
+  mutate(pct=avg/1000)
 
-#top 5 states in mortality by topic
 state_avg_highest<- state_avg %>% 
-  group_by(Topic,Data_Value_Type) %>% 
-  top_n(5,avg) %>% 
-  arrange(Data_Value_Type,desc(avg))
+  group_by(Topic) %>% 
+  top_n(5,pct) %>% 
+  arrange(Topic,desc(pct))
 
-#plot of the top 5 states in every topic 
-state_avg_highest%>% 
-  filter(Topic=="Heart Attack") %>% 
-ggplot()+
-geom_col(aes(reorder(LocationAbbr,avg),avg,fill=LocationAbbr))+
-  facet_wrap(~Data_Value_Type,ncol = 2,scales = "free")+
-  labs(title = "Average Mortality from Heart Attack",
-       x=element_blank())+
-  guides(fill=FALSE)+
-  theme(plot.title = element_text(hjust = 0.5))
-
-state_avg_highest%>% 
-  filter(Topic=="Stroke") %>% 
+state_avg_highest %>% 
   ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=LocationAbbr))+
-  facet_wrap(~Data_Value_Type,ncol = 2,scales = "free")+
-  labs(title = "Average Mortality from Stroke",
+  geom_col(aes(reorder(State,pct),pct,fill=Topic))+
+  facet_wrap(~Topic,scales = "free")+
+  coord_flip()+
+  labs(title = "Average Mortality Among States",
        x=element_blank())+
-  guides(fill=FALSE)+
-  theme(plot.title = element_text(hjust = 0.5))
-
-
-state_avg_highest%>% 
-  filter(Topic=="Major Cardiovascular Disease") %>% 
-  ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=LocationAbbr))+
-  facet_wrap(~Data_Value_Type,ncol = 2,scales = "free")+
-  labs(title = "Average Mortality from Major Cardiovascular Diease",
-       x=element_blank())+
-  guides(fill=FALSE)+
-  theme(plot.title = element_text(hjust = 0.5))
-
-
-state_avg_highest%>% 
-  filter(Topic=="Heart Failure") %>% 
-  ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=LocationAbbr))+
-  facet_wrap(~Data_Value_Type,ncol = 2,scales = "free")+
-  labs(title = "Average Mortality from Heart Failure",
-       x=element_blank())+
-  guides(fill=FALSE)+
-  theme(plot.title = element_text(hjust = 0.5))
-
-state_avg_highest%>% 
-  filter(Topic=="Heart Diease") %>% 
-  ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=LocationAbbr))+
-  facet_wrap(~Data_Value_Type,ncol = 2,scales = "free")+
-  labs(title = "Average Mortality from Heart Diease",
-       x=element_blank())+
-  guides(fill=FALSE)+
-  theme(plot.title = element_text(hjust = 0.5))
-
-state_avg_highest%>% 
-  filter(Topic=="Coronary Heart Disease") %>% 
-  ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=LocationAbbr))+
-  facet_wrap(~Data_Value_Type,ncol = 2,scales = "free")+
-  labs(title = "Average Mortality from Coronary Heart Disease",
-       x=element_blank())+
-  guides(fill=FALSE)+
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-```{r vitalFacet}
-#2 plots faceted by topic showing the highest age-standarized and crude average rates
-state_avg_highest%>% 
-  filter(Data_Value_Type=="Crude") %>% 
-  ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=LocationAbbr))+
-  facet_wrap(~Topic,ncol = 2,scales = "free")+
-  labs(title = "Average Crude Mortality Rate",
-       x=element_blank())+
-  guides(fill=FALSE)+
-  theme(plot.title = element_text(hjust = 0.5))
-
-state_avg_highest%>% 
-  filter(Data_Value_Type=="Age-Standardized") %>% 
-  ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=LocationAbbr))+
-  facet_wrap(~Topic,ncol = 3,scales = "free")+
-  labs(title = "Average Age-Standardized Mortality Rate",
-       x=element_blank())+
-  guides(fill=FALSE)+
-  theme(plot.title = element_text(hjust = 0.5))
-```
-
-```{r vitalGender}
-####Which gender has the highest average mortality rate for each topic####
-#find the average mortality rate among genders for each topic
+##Which gender has the highest average mortality from various cardiovascular diseases?
+```{r GenderMortality,echo=FALSE}
 Gender_average <- rate%>% 
-  filter(Break_Out_Category=="Gender") %>%
+  filter(Break_Out_Category=="Gender",Topic!="Major Cardiovascular Disease",Data_Value_Type=="Age-Standardized") %>%
   select(-Break_Out_Category) %>% 
   rename(Gender = Break_Out) %>% 
-  group_by(Topic,Gender,Data_Value_Type) %>% 
-  summarise(avg=mean(Data_Value))
+  group_by(Topic,Gender) %>% 
+  summarise(avg=mean(Data_Value)) %>% 
+  mutate(pct=avg/1000) %>% 
+  arrange(Topic,desc(pct))
 
-#Plot the average mortality for each gender by topic
 Gender_average %>% 
   ggplot()+
-  geom_col(aes(Gender,avg,fill=Data_Value_Type),position = "dodge")+
-  facet_wrap(~Topic,scales = "free")+
-  labs(title = "Average Mortality among Gender")+
-  theme(plot.title = element_text(hjust = 0.5,size = 25))
+  geom_col(aes(Gender,pct,fill=Topic))+
+  facet_wrap(~Topic,scales = "free_y")+
+  labs(title = "Average Mortality among Gender",
+       x=element_blank())+
+  theme(plot.title = element_text(hjust = 0.5,size = 25))+
+  guides(fill=FALSE)
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```{r mappingHandling, echo=FALSE}
 vitalGender <- vital%>%

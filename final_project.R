@@ -88,7 +88,8 @@ Gender_average %>%
 
 
 
-
+temp %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
+  addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
 
 
 #####Isaiah's Code####
