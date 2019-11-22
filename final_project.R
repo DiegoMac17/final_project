@@ -238,16 +238,6 @@ cardio %>%
   top_n(10)
 
 
-
-
-
-
-
-
-
-
-
-
 ####Joining and mapping####
 #Select relevant variables 
 vitalGender <- vital%>%
@@ -267,36 +257,8 @@ vitalGender <- vitalGender%>% mutate(GeoLocation = str_remove_all(GeoLocation, "
   na.omit()
 
 
-
-#Probably delete this section
-####What lifestyle combination has the highest mortality rates for stroke in men and female ?####
-stroke_gender <- vitalGender %>%
-  filter(Topic == "Stroke") %>% group_by(Gender) %>%
-  summarise(avg_deathRate = mean(Data_Value))
-
-
-cardioJoin <- mycardio %>%
-  group_by(Gender, Smoke, Alcohol, Active ,Cardio) %>% summarise(n = n())
-
-
-stroke_lifestyle <- left_join(cardioJoin, stroke_gender)
-
-plot_stroke_f <- stroke_lifestyle %>% filter(Gender=="Female") %>%
-  arrange(desc(n)) %>% head(1)
-plot_stroke_m <- stroke_lifestyle %>% filter(Gender=="Male") %>%
-  arrange(desc(n)) %>% head(1)
-
-plot_stroke <- bind_rows(plot_stroke_m,plot_stroke_f)
-
-plot_stroke %>% ggplot() +
-  geom_col(aes(x=Gender, y= n, fill = avg_deathRate))
-
-
-
-
-
 #### map of the us for stroke avg death rate (heat map) ####
-strokeM <- vitalGender %>% filter(Topic == "Stroke", Gender == "Male",Data_Value_Type=="Age-Standardized") %>%
+strokeM <- vitalGender %>% filter(Data_Value_Type=="Age-Standardized") %>%
   group_by(LocationAbbr) %>% summarise(avg_deathRate = mean(Data_Value)) %>% rename(state = LocationAbbr)
 
 #create a data fram with the us states
@@ -321,11 +283,9 @@ strokeMaleMap %>%
             inherit.aes = FALSE )+
   theme_map()+
   coord_equal()+
-  labs(title = " Average Death Rate for stroke in Males", fill = "Rate per 100,000") +
+  labs(title = " Average Death Rate - Age standarized", fill = "Rate per 100,000") +
   theme(plot.title = element_text(hjust=0.5),
         legend.position = "bottom")
-
-strokeF <- vitalGender %>% filter(Topic == "Stroke", Gender == "Female")
 
 
 
