@@ -40,123 +40,49 @@ rate<- vital%>%
 
 #average mortality rate for each state by topic
 state_avg <- rate %>% 
-  group_by(LocationAbbr,Topic,Data_Value_Type) %>% 
-  summarise(avg=mean(Data_Value))
+  filter(Data_Value_Type=="Age-Standardized",Topic!="Major Cardiovascular Disease") %>% 
+  group_by(LocationAbbr,Topic) %>% 
+  summarise(avg=mean(Data_Value)) %>% 
+  mutate(pct=avg/100000*100)
 
 #top 5 states in mortality by topic
 state_avg_highest<- state_avg %>% 
-  group_by(Topic,Data_Value_Type) %>% 
-  top_n(5,avg) %>% 
-  arrange(Data_Value_Type,desc(avg))
+  group_by(Topic) %>% 
+  top_n(5,pct) %>% 
+  arrange(Topic,desc(pct))
 
 #plot of the top 5 states in every topic 
-state_avg_highest%>% 
-  filter(Topic=="Heart Attack") %>% 
+state_avg_highest%>%
 ggplot()+
-geom_col(aes(reorder(LocationAbbr,avg),avg,fill=LocationAbbr))+
-  facet_wrap(~Data_Value_Type,ncol = 2,scales = "free")+
-  labs(title = "Average Mortality from Heart Attack",
-       x=element_blank())+
-  guides(fill=FALSE)+
-  theme(plot.title = element_text(hjust = 0.5))
-
-state_avg_highest%>% 
-  filter(Topic=="Stroke") %>% 
-  ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=LocationAbbr))+
-  facet_wrap(~Data_Value_Type,ncol = 2,scales = "free")+
-  labs(title = "Average Mortality from Stroke",
-       x=element_blank())+
-  guides(fill=FALSE)+
-  theme(plot.title = element_text(hjust = 0.5))
-
-
-state_avg_highest%>% 
-  filter(Topic=="Major Cardiovascular Disease") %>% 
-  ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=LocationAbbr))+
-  facet_wrap(~Data_Value_Type,ncol = 2,scales = "free")+
-  labs(title = "Average Mortality from Major Cardiovascular Diease",
-       x=element_blank())+
-  guides(fill=FALSE)+
-  theme(plot.title = element_text(hjust = 0.5))
-
-
-state_avg_highest%>% 
-  filter(Topic=="Heart Failure") %>% 
-  ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=LocationAbbr))+
-  facet_wrap(~Data_Value_Type,ncol = 2,scales = "free")+
-  labs(title = "Average Mortality from Heart Failure",
-       x=element_blank())+
-  guides(fill=FALSE)+
-  theme(plot.title = element_text(hjust = 0.5))
-
-state_avg_highest%>% 
-  filter(Topic=="Heart Diease") %>% 
-  ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=LocationAbbr))+
-  facet_wrap(~Data_Value_Type,ncol = 2,scales = "free")+
-  labs(title = "Average Mortality from Heart Diease",
-       x=element_blank())+
-  guides(fill=FALSE)+
-  theme(plot.title = element_text(hjust = 0.5))
-
-state_avg_highest%>% 
-  filter(Topic=="Coronary Heart Disease") %>% 
-  ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=LocationAbbr))+
-  facet_wrap(~Data_Value_Type,ncol = 2,scales = "free")+
-  labs(title = "Average Mortality from Coronary Heart Disease",
-       x=element_blank())+
-  guides(fill=FALSE)+
-  theme(plot.title = element_text(hjust = 0.5))
-
-
-
-#2 plots faceted by topic showing the highest age-standarized and crude average rates
-state_avg_highest%>% 
-  filter(Data_Value_Type=="Crude") %>% 
-  ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=LocationAbbr))+
+geom_col(aes(reorder(LocationAbbr,pct),pct,fill=Topic),position = "dodge")+
   facet_wrap(~Topic,ncol = 2,scales = "free")+
-  labs(title = "Average Crude Mortality Rate",
+  labs(title = "Average Mortality Among States",
        x=element_blank())+
   guides(fill=FALSE)+
   theme(plot.title = element_text(hjust = 0.5))
 
-state_avg_highest%>% 
-  filter(Data_Value_Type=="Age-Standardized") %>% 
-  ggplot()+
-  geom_col(aes(reorder(LocationAbbr,avg),avg,fill=LocationAbbr))+
-  facet_wrap(~Topic,ncol = 3,scales = "free")+
-  labs(title = "Average Age-Standardized Mortality Rate",
-       x=element_blank())+
-  guides(fill=FALSE)+
-  theme(plot.title = element_text(hjust = 0.5))
-
-#the above plots are the same just filtered for topic or faceted by topic. filtering produces 6 graphs for each topic.
-#the plots faceted by topic produces two 
-#We can decide which is a better visualization
 
 
 
 ####Which gender has the highest average mortality rate for each topic####
 #find the average mortality rate among genders for each topic
 Gender_average <- rate%>% 
-  filter(Break_Out_Category=="Gender") %>%
+  filter(Break_Out_Category=="Gender",Topic!="Major Cardiovascular Disease",Data_Value_Type=="Age-Standardized") %>%
   select(-Break_Out_Category) %>% 
   rename(Gender = Break_Out) %>% 
-  group_by(Topic,Gender,Data_Value_Type) %>% 
-  summarise(avg=mean(Data_Value))
+  group_by(Topic,Gender) %>% 
+  summarise(avg=mean(Data_Value)) %>% 
+  mutate(pct=avg/100000*100) %>% 
+  arrange(Topic,desc(pct))
 
 #Plot the average mortality for each gender by topic
 Gender_average %>% 
   ggplot()+
-  geom_col(aes(Gender,avg,fill=Data_Value_Type),position = "dodge")+
-  facet_wrap(~Topic,scales = "free")+
+  geom_col(aes(Gender,pct,fill=Topic))+
+  facet_wrap(~Topic,scales = "free_y")+
   labs(title = "Average Mortality among Gender")+
-  theme(plot.title = element_text(hjust = 0.5,size = 25))
+  theme(plot.title = element_text(hjust = 0.5,size = 25))+
+  guides(fill=FALSE)
 
 
 
@@ -404,6 +330,7 @@ cardio %>%
   top_n(10)
 
 
+<<<<<<< HEAD
 # temp %>% 
 #   filter(Topic=="Acute Myocardial Infarction (Heart Attack)" & Year==2000 & LocationAbbr=="AL") %>% 
 #   view()
@@ -421,6 +348,9 @@ cardio %>%
 #   coord_flip()+
 #   labs(title = "Coronary Heart Disease")+
 #   facet_wrap(~Topic,scales = "free",ncol = 3)
+=======
+
+>>>>>>> ee95eb35e37c0e7ec1cc6de0f609a48a7f807fd9
 
 
 
@@ -434,7 +364,7 @@ cardio %>%
 #Select relevant variables 
 vitalGender <- vital%>%
   select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
-         HighConfidenceLimit,LowConfidenceLimit,Data_Value) %>% 
+         HighConfidenceLimit,LowConfidenceLimit,Data_Value,Data_Value_Type) %>% 
   arrange(Topic) %>% 
   na.omit()
 #Use only the gender break out
@@ -448,8 +378,7 @@ vitalGender <- vitalGender%>% mutate(GeoLocation = str_remove_all(GeoLocation, "
          Longitude = as.numeric(Longitude)) %>% 
   na.omit()
 
-#strokeM %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
-#  addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
+
 
 
 ####What lifestyle combination has the highest mortality rates for stroke in male and female ?####
@@ -472,12 +401,12 @@ plot_stroke_m <- stroke_lifestyle %>% filter(Gender=="Male") %>%
 plot_stroke <- bind_rows(plot_stroke_m,plot_stroke_f)
 
 plot_stroke %>% ggplot() +
-  geom_point(aes(x=Gender, y= n, fill = avg_deathRate))
+  geom_col(aes(x=Gender, y= n, fill = avg_deathRate))
 
 
 
 #### map of the us for stroke avg death rate ####
-strokeM <- vitalGender %>% filter(Topic == "Stroke", Gender == "Male") %>%
+strokeM <- vitalGender %>% filter(Topic == "Stroke", Gender == "Male",Data_Value_Type=="Age-Standardized") %>%
   group_by(LocationAbbr) %>% summarise(avg_deathRate = mean(Data_Value)) %>% rename(state = LocationAbbr)
 
 #create a data fram with the us states
@@ -539,4 +468,44 @@ mycardioAgeGroup <- mycardioAgeGroup %>% group_by(Age) %>% summarise(cardio_avg 
 
 vital_cardio_join_age <- left_join(vitalAgeRelevant,mycardioAgeGroup)
 
+<<<<<<< HEAD
+#### What is the average mortality by state leaflet map? ####
+vital_avg_state_all <- vital%>%
+  select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
+         HighConfidenceLimit,LowConfidenceLimit,Data_Value, Data_Value_Type) %>% 
+  arrange(Topic) %>% 
+  na.omit()
+vital_avg_state_all <- vital_avg_state_all %>%
+  group_by(LocationAbbr) %>% mutate(avg = mean(Data_Value)) %>%
+  distinct(LocationAbbr, .keep_all = TRUE)
+vital_avg_state_all <- vital_avg_state_all%>% mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
+                                     GeoLocation = str_remove_all(GeoLocation, "\\)")) %>% 
+  separate(GeoLocation,into = c("Latitude", "Longitude"),  ",") %>% 
+  mutate(Latitude = as.numeric(Latitude),
+         Longitude = as.numeric(Longitude)) %>% 
+  na.omit()
+
+vital_avg_state_all %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
+  addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
+=======
 #### Which vital factor contributes the most to mortality rate by gender? ####
+
+age <- vitalAge %>% 
+  group_by(Topic,Age) %>% 
+  summarise(avg=mean(Data_Value))
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> df3f8ec5d768461d93e0e1075560fc05e7dd10d2
