@@ -143,7 +143,10 @@ mycardio %>%
                            color = Cardio),
              alpha = 0.1) +
   scale_color_manual(values = mycolors) +
-  labs(title = "Blood Pressure with Cardiovascular Disease")
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(title = "Blood Pressure with Cardiovascular Disease",
+       x = "Systolic blood pressure (mmHg)",
+       y = "Diastolic blood pressure (mmHg)") 
 
 # mycardio %>%
 #   filter(Cholesterol == "1" & Glucose == "1" & `Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
