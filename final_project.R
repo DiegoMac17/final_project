@@ -344,9 +344,10 @@ vital_cardio_join_age <- left_join(vitalAgeRelevant,mycardioAgeGroup)
 vital_cardio_join_plot <- vital_cardio_join_age %>%
   gather(Pct_category,Pavg, -Age)
 
-vital_cardio_join_plot %>% ggplot()+
-  geom_point(aes(Age, Pavg, color = Pct_category), size = 3)+
-  geom_line(aes(Age, Pavg, color = Pct_category), linetype = "dotted") + 
+vital_cardio_join_plot %>% 
+  ggplot(aes(Age, Pavg, color = Pct_category, group =1 ))+
+  geom_point(size = 3)+
+  geom_line(linetype = "dotted") + 
   facet_wrap(~Pct_category, scales = "free") +
   labs(title = "Comparison of lifestyles with average death rates",
        x = "Age", y = "Average") + guides(color = FALSE) +
