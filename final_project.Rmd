@@ -1,17 +1,20 @@
 ---
-title: "final_project"
-author: "Diego, Isaiah, Jake"
+title: "The Correlation of Mortality and Lifestyle"
+author: "Diego Reyes, Isiah Vaughnn, James Tweedle"
 date: "11/14/2019"
-output: html_document
+output:
+  html_document: default 
+  pdf_document: default
+knit:
+  rmarkdown::render("final_project.Rmd",output_format="all")
 ---
 
+----
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-```{r load-libraries, message=FALSE}
+```{r load-libraries, message=FALSE,echo=FALSE}
 library(tidyverse)
 library(leaflet)
 library(RColorBrewer)
@@ -30,7 +33,7 @@ cardio <- read_csv2("data/cardio_train.csv")
 vital <- read_csv("data/Data1.csv")
 ```
 
-```{r cardioHandeling, echo=FALSE}
+```{r cardioHandeling, echo=FALSE,warning=FALSE,message=FALSE}
 mycardio <- cardio %>%
   rename("ID" = id,
          "Age" = age,
@@ -72,7 +75,7 @@ mycardio <- mycardio %>%
 
 ```
 
-```{r cardioFacet}
+```{r cardioFacet,echo=FALSE,warning=FALSE,message=FALSE}
 facetCardio <- mycardio %>%
   select(Gender, Smoke:Cardio) %>%
   gather("Lifestyle", "Occurance", -Gender) %>%
@@ -117,7 +120,7 @@ percentLife <- bind_rows(actFe, actMa, alcFe, alcMa, cardFe, cardMa, smoFe, smoM
 percentLife$Occurance <- NULL
 ```
 
-```{r lifestyleGraph}
+```{r lifestyleGraph,echo=FALSE,warning=FALSE,message=FALSE}
 percentLife %>%
   filter(Lifestyle == "Active" | Lifestyle == "Alcohol" | Lifestyle == "Smoke") %>%
   ggplot() +
@@ -132,7 +135,9 @@ percentLife %>%
   labs(title = "Percentage of Gender with Cardiovascular Disease")
 ```
 
-```{r bloodpressureGraph}
+
+----
+```{r bloodpressureGraph,echo=FALSE,warning=FALSE,message=FALSE}
 mycolors <- c("green", "red")
 
 
@@ -159,6 +164,7 @@ mycardio %>%
 #   labs(title = "Blood Pressure with Cardiovascular Disease")
 ```
 
+----
 
 ## Which states have the highest average mortality from various cardiovascular dieases?
 ```{r vitalHandling, echo=FALSE}
@@ -201,6 +207,8 @@ state_avg_highest %>%
   guides(fill=FALSE)
 ```
 
+---
+
 ## Which gender has the highest average mortality from various cardiovascular diseases?
 ```{r GenderMortality,echo=FALSE}
 Gender_average <- rate%>% 
@@ -223,9 +231,9 @@ Gender_average %>%
 ```
 
 
+---
 
-
-```{r dataPrepareJoinPlot, echo=FALSE}
+```{r dataPrepareJoinPlot, echo=FALSE,message=FALSE,warning=FALSE}
 #Select relevant variables from vital dataset
 vitalJoinPlot <- vital%>%
   select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
@@ -247,9 +255,9 @@ vitalJoinPlot <- vitalJoinPlot%>% mutate(GeoLocation = str_remove_all(GeoLocatio
 
 
 
-## map of the US for stroke avg death rate (heat map)
+## map of the US for avg death rate (heat map)
 
-``` {r mapUSAvgDeathRate, echo = FALSE }
+``` {r mapUSAvgDeathRate, echo = FALSE, warning=FALSE,message=FALSE }
 #Select only age standardized data and obtain average death rate per state
 deathRateMap <- vitalJoinPlot %>%
   filter(Data_Value_Type=="Age-Standardized") %>%
@@ -285,10 +293,10 @@ deathRateMapUS %>%
 ```
 
 
-
+----
 
 ## Relation between age groups, life styles, cardivascular disease and death rates
-```{r lifestyleJoinDeathRate, echo=FALSE}
+```{r lifestyleJoinDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
 #Relation between age groups and life styles and cardivascular disease
 
 #Select relevant variables 
@@ -356,10 +364,12 @@ vital_cardio_join_plot %>%
 
 
 
-
+----
 
 ## What is the average mortality by state leaflet map
-```{r leafletMapAvgDeathRate, echo=FALSE}
+
+### 
+```{r leafletMapAvgDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
 #Select relevant variables
 vital_avg_state_all <- vital%>%
   select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
@@ -404,4 +414,3 @@ state_avg_leaflet %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
   addMarkers(~Longitude, ~Latitude, label = state_label, popup = state_label)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
