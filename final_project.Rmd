@@ -2,9 +2,7 @@
 title: "final_project"
 author: "Diego, Isaiah, Jake"
 date: "11/14/2019"
-output:
-  html_document: default
-  pdf_document: default
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -21,6 +19,10 @@ library(socviz)
 library(usmap)
 library(maps)
 library(cowplot)
+library(rmarkdown)
+library(htmltools)
+library(tinytex)
+library(knitr)
 ```
 
 ```{r readingData, echo=FALSE, warning=FALSE, message=FALSE}
@@ -174,6 +176,8 @@ rate<- vital%>%
   na.omit()
 ```
 
+
+
 ```{r StateMortality, echo=FALSE}
 state_avg <- rate %>% 
   filter(Data_Value_Type=="Age-Standardized") %>% 
@@ -218,6 +222,9 @@ Gender_average %>%
   guides(fill=FALSE)
 ```
 
+
+
+
 ```{r dataPrepareJoinPlot, echo=FALSE}
 #Select relevant variables from vital dataset
 vitalJoinPlot <- vital%>%
@@ -237,6 +244,8 @@ vitalJoinPlot <- vitalJoinPlot%>% mutate(GeoLocation = str_remove_all(GeoLocatio
   na.omit()
 
 ```
+
+
 
 ## map of the US for stroke avg death rate (heat map)
 
@@ -274,6 +283,9 @@ deathRateMapUS %>%
         legend.position = "bottom")
 
 ```
+
+
+
 
 ## Relation between age groups, life styles, cardivascular disease and death rates
 ```{r lifestyleJoinDeathRate, echo=FALSE}
@@ -341,6 +353,10 @@ vital_cardio_join_plot %>%
        x = "Age", y = "Average") + guides(color = FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
+
+
+
+
 
 ## What is the average mortality by state leaflet map
 ```{r leafletMapAvgDeathRate, echo=FALSE}
