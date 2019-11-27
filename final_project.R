@@ -239,17 +239,17 @@ cardio %>%
 
 
 ####Joining and mapping####
-#Select relevant variables 
-vitalGender <- vital%>%
+#Select relevant variables from vital dataset
+vitalJoinPlot <- vital%>%
   select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
          HighConfidenceLimit,LowConfidenceLimit,Data_Value,Data_Value_Type) %>% 
   arrange(Topic) %>% 
   na.omit()
 #Use only the gender break out
-vitalGender <- vitalGender %>% filter(Break_Out_Category=="Gender") %>%
+vitalJoinPlot <- vitalJoinPlot %>% filter(Break_Out_Category=="Gender") %>%
   select(-Break_Out_Category) %>% rename(Gender = Break_Out)
-#Divide geolocation into latitude and longitude
-vitalGender <- vitalGender%>% mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
+#Divide geolocation into latitude and longitude and prepare for plotting
+vitalJoinPlot <- vitalJoinPlot%>% mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
                                      GeoLocation = str_remove_all(GeoLocation, "\\)")) %>% 
   separate(GeoLocation,into = c("Latitude", "Longitude"),  ",") %>% 
   mutate(Latitude = as.numeric(Latitude),
@@ -257,21 +257,24 @@ vitalGender <- vitalGender%>% mutate(GeoLocation = str_remove_all(GeoLocation, "
   na.omit()
 
 
-#### map of the us for stroke avg death rate (heat map) ####
-strokeM <- vitalGender %>% filter(Data_Value_Type=="Age-Standardized") %>%
-  group_by(LocationAbbr) %>% summarise(avg_deathRate = mean(Data_Value)) %>% rename(state = LocationAbbr)
+#### map of the US for stroke avg death rate (heat map) ####
+#Select only age standardized data and obtain average death rate per state
+deathRateMap <- vitalJoinPlot %>%
+  filter(Data_Value_Type=="Age-Standardized") %>%
+  group_by(LocationAbbr) %>%
+  summarise(avg_deathRate = mean(Data_Value)) %>% rename(state = LocationAbbr)
 
 #create a data fram with the us states
 us_states <- us_map("states")
 #Rename abbr to state
 us_states <- us_states %>% rename(state=abbr)
 #create data frame with mortality rate for mapping
-strokeMaleMap <- left_join(us_states, strokeM)
+deathRateMapUS <- left_join(us_states, deathRateMap)
 #find centroid and bind to death rate
-centroid <- aggregate(data=strokeMaleMap,
+centroid <- aggregate(data=deathRateMapUS,
                       cbind(x, y) ~ avg_deathRate, FUN=mean)
 #plot avg  death rate in us state map
-strokeMaleMap %>%
+deathRateMapUS %>%
   ggplot(aes(x,y, group=group, fill=avg_deathRate)) + 
   geom_polygon(color = "darkgray", size = 0.5)+
   scale_fill_gradient(low = "orange", 
@@ -313,6 +316,7 @@ cardio_j <- cardio %>%
          "Alcohol" = alco,
          "Active" = active,
          "Cardio" = cardio)
+#prepare data for wrangling
 cardio_j <- cardio_j %>%
   mutate(Age = as.numeric(Age)/365) %>%
   mutate(Gender = case_when(Gender == "1" ~ "Female", 
@@ -329,21 +333,21 @@ vitalAgeRelevant <- vitalAge %>% filter(Data_Value_Type == "Crude",
   group_by(Age) %>%
   mutate(`Death Rate` = mean(Data_Value)/1000) %>%
   distinct(Age, .keep_all = TRUE) %>% select(Age,`Death Rate`)
-
+#convert ages to age range to match vital data set
 mycardioAgeGroup <- cardio_j %>%
   mutate(Age = if_else(condition = Age<44, true = "25-44", false ="45-64"))
-
+#obtain percent average for lifestyles 
 mycardioAgeGroup <- mycardioAgeGroup %>% group_by(Age) %>%
   summarise(Cardio = mean(Cardio)*100,
             Alcohol = mean(Alcohol)*100,
             Active = mean(Active)*100,
             Smoke = mean(Smoke)*100)
-
+#join vital and cardio data sets by age group
 vital_cardio_join_age <- left_join(vitalAgeRelevant,mycardioAgeGroup)
-
+#gather for ploting
 vital_cardio_join_plot <- vital_cardio_join_age %>%
   gather(Pct_category,Pavg, -Age)
-
+#plot for comparison between lifestyles and death rate by age group
 vital_cardio_join_plot %>% 
   ggplot(aes(Age, Pavg, color = Pct_category, group =1 ))+
   geom_point(size = 3)+
@@ -361,7 +365,7 @@ vital_avg_state_all <- vital%>%
          HighConfidenceLimit,LowConfidenceLimit,Data_Value, Data_Value_Type) %>% 
   arrange(Topic) %>% 
   na.omit()
-
+#prepare geolocation from vital for plotting
 vital_avg_state_all <- vital_avg_state_all %>%
   group_by(LocationAbbr) %>% mutate(avg = mean(Data_Value)) %>%
   distinct(LocationAbbr, .keep_all = TRUE)
@@ -371,19 +375,20 @@ vital_avg_state_all <- vital_avg_state_all%>% mutate(GeoLocation = str_remove_al
   mutate(Latitude = as.numeric(Latitude),
          Longitude = as.numeric(Longitude)) %>% 
   na.omit()
-
+#filter data to use age standarized data only and get rid of umbrella disease
 state_avg_leaflet <- rate %>% 
   filter(Data_Value_Type=="Age-Standardized",Topic!="Major Cardiovascular Disease") %>% 
   group_by(Longitude,Latitude,State,Topic) %>% 
   summarise(avg=mean(Data_Value)) %>% 
   mutate(pct=avg/1000)
+#round averages for user friendly display
 state_avg_leaflet <- state_avg_leaflet %>% select(-pct) %>%
   spread(Topic, avg) %>% mutate(`Coronary Heart Disease` = round(`Coronary Heart Disease`,2),
                                 `Heart Attack` = round(`Heart Attack`,2),
                                 `Heart Disease` = round(`Heart Disease`,2),
                                 `Heart Failure` = round(`Heart Failure`, 2),
                                 `Stroke` = round(`Stroke`, 2))
-
+#create labels for display on leaflet
 state_label <- sprintf("<b>Average mortality rate in: %s</b><br />Coronary Heart Disease:  %s<br/ >Heart Attack: %s<br/ >Heart Disease: %s<br/ >Heart Failure: %s<br/ >Stroke: %s",
                        state_avg_leaflet$State,
                     state_avg_leaflet$`Coronary Heart Disease`,
@@ -392,7 +397,7 @@ state_label <- sprintf("<b>Average mortality rate in: %s</b><br />Coronary Heart
                     state_avg_leaflet$`Heart Failure`,
                     state_avg_leaflet$`Stroke`) %>%
   lapply(htmltools::HTML)
-
+#Plot into leaflet 
 state_avg_leaflet %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
   addTiles() %>% setView(-98.00,38.71,zoom=4) %>%
   addMarkers(~Longitude, ~Latitude, label = state_label, popup = state_label)
