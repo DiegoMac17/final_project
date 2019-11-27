@@ -68,21 +68,6 @@ mycardio <- mycardio %>%
 
 ```
 
-```{r lifestyleGraph}
-percentLife %>%
-  filter(Lifestyle == "Active" | Lifestyle == "Alcohol" | Lifestyle == "Smoke") %>%
-  ggplot() +
-  geom_bar(mapping = aes(x = Gender, y = percent, fill = Lifestyle), stat = "identity") +
-  facet_wrap(~Lifestyle, scales = "free_y")
-
-percentLife %>%
-  filter(Lifestyle == "Cardio") %>%
-  ggplot() +
-  geom_bar(mapping = aes(x = Gender, y = percent, fill = percent), stat = "identity") +
-  scale_fill_distiller(palette = "Spectral") +
-  labs(title = "Percentage of Gender with Cardiovascular Disease")
-```
-
 ```{r cardioFacet}
 facetCardio <- mycardio %>%
   select(Gender, Smoke:Cardio) %>%
@@ -126,6 +111,21 @@ smoMa <- facetCardio %>%
 
 percentLife <- bind_rows(actFe, actMa, alcFe, alcMa, cardFe, cardMa, smoFe, smoMa)
 percentLife$Occurance <- NULL
+```
+
+```{r lifestyleGraph}
+percentLife %>%
+  filter(Lifestyle == "Active" | Lifestyle == "Alcohol" | Lifestyle == "Smoke") %>%
+  ggplot() +
+  geom_bar(mapping = aes(x = Gender, y = percent, fill = Lifestyle), stat = "identity") +
+  facet_wrap(~Lifestyle, scales = "free_y")
+
+percentLife %>%
+  filter(Lifestyle == "Cardio") %>%
+  ggplot() +
+  geom_bar(mapping = aes(x = Gender, y = percent, fill = percent), stat = "identity") +
+  scale_fill_distiller(palette = "Spectral") +
+  labs(title = "Percentage of Gender with Cardiovascular Disease")
 ```
 
 ```{r bloodpressureGraph}
@@ -364,7 +364,7 @@ vital_avg_state_all <- vital_avg_state_all%>% mutate(GeoLocation = str_remove_al
 
 state_avg_leaflet <- rate %>% 
   filter(Data_Value_Type=="Age-Standardized",Topic!="Major Cardiovascular Disease") %>% 
-  group_by(Longitude,Latitude,LocationAbbr,Topic) %>% 
+  group_by(Longitude,Latitude,State,Topic) %>% 
   summarise(avg=mean(Data_Value)) %>% 
   mutate(pct=avg/100000*100)
 state_avg_leaflet <- state_avg_leaflet %>% select(-pct) %>%
@@ -375,7 +375,7 @@ state_avg_leaflet <- state_avg_leaflet %>% select(-pct) %>%
                                 `Stroke` = round(`Stroke`, 2))
 
 state_label <- sprintf("<b>Average mortality rate in: %s</b><br />Coronary Heart Disease:  %s<br/ >Heart Attack: %s<br/ >Heart Disease: %s<br/ >Heart Failure: %s<br/ >Stroke: %s",
-                       state_avg_leaflet$LocationAbbr,
+                       state_avg_leaflet$State,
                     state_avg_leaflet$`Coronary Heart Disease`,
                     state_avg_leaflet$`Heart Attack`,
                     state_avg_leaflet$`Heart Disease`,
