@@ -196,7 +196,8 @@ mycardio %>%
 
 ## How are systolic and diastolic blood pressure indicators of Cardiovascular Disease?
 
-```{r bloodpressureGraph,echo=FALSE,warning=FALSE,message=FALSE
+
+```{r bloodpressureGraph,echo=FALSE,warning=FALSE,message=FALSE}
 mycolors <- c("green", "red")
 
 
@@ -240,6 +241,13 @@ mycardio %>%
        x = "Systolic blood pressure (mmHg)",
        y = "Weight (lbs)")
 ```
+<<<<<<< HEAD
+=======
+
+
+
+
+>>>>>>> fa2cf29c9c76fa563cd6964e7eb95f399081994f
 ## Which states have the highest average mortality from various Cardiovascular diseases?
 
 ```{r vitalHandling, echo=FALSE}
