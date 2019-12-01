@@ -124,7 +124,7 @@ percentLife$Occurance <- NULL
 
 ----
 
-## W
+## What are lifestyle percentages by gender, and what factors affect Cardiovascular disease incidence?
 
 ```{r lifestyleGraph,echo=FALSE,warning=FALSE,message=FALSE}
 percentLife %>%
