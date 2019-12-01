@@ -34,7 +34,6 @@ cardio <- read_csv2("data/cardio_train.csv")
 vital <- read_csv("data/Data1.csv")
 ```
 
-
 ```{r cardioHandeling, echo=FALSE,warning=FALSE,message=FALSE}
 mycardio <- cardio %>%
   rename("ID" = id,
@@ -122,9 +121,6 @@ percentLife <- bind_rows(actFe, actMa, alcFe, alcMa, cardFe, cardMa, smoFe, smoM
 percentLife$Occurance <- NULL
 ```
 
-
-
-
 ## What are lifestyle percentages by gender, and what factors affect Cardiovascular disease incidence?
 
 ```{r lifestyleGraph,echo=FALSE,warning=FALSE,message=FALSE}
@@ -148,9 +144,6 @@ percentLife %>%
   labs(title = "Percentage of Gender with Cardiovascular Disease",
        y = "Percentage")
 ```
-
-
-
 
 ## How are systolic and diastolic blood pressure indicators of Cardiovascular Disease?
 
@@ -183,6 +176,7 @@ mycardio %>%
 #   scale_color_manual(values = mycolors) +
 #   labs(title = "Blood Pressure with Cardiovascular Disease")
 ```
+
 
 
 
@@ -227,6 +221,7 @@ state_avg_highest %>%
   theme(plot.title = element_text(hjust = 0.5))+
   guides(fill=FALSE)
 ```
+
 
 
 
@@ -317,6 +312,7 @@ deathRateMapUS %>%
 
 
 
+
 ## What is the relation between age groups, life styles, Cardiovascular disease and death rates?
 ```{r lifestyleJoinDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
 #Relation between age groups and life styles and cardivascular disease
@@ -383,10 +379,6 @@ vital_cardio_join_plot %>%
        x = "Age", y = "Average") + guides(color = FALSE) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
-
-
-
-
 
 ## What is the average mortality by state?
 Rates are expressed as per 100,000 population
