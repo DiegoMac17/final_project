@@ -148,6 +148,52 @@ percentLife %>%
        y = "Percentage")
 ```
 
+```{r lifestyleHisto,echo=FALSE,warning=FALSE,message=FALSE}
+mycolors2 <- c("green3", "red1")
+
+mycardio %>%
+  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
+  filter(Weight < 400) %>%
+  filter(Weight > 50) %>%
+  ggplot() +
+  geom_histogram(mapping = aes(x = Weight,
+                               fill = Cardio),
+                 bins = 20,
+                 position = "dodge") +
+  scale_fill_manual(values = mycolors2) +
+  labs(title = "Weight Distribution Relative to Cardiovascular Disease",
+       x = "Weight (lbs)",
+       y = "Population Count")
+
+
+mycardio %>%
+  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
+  filter(Weight < 400) %>%
+  filter(Weight > 50) %>%
+  ggplot() +
+  geom_histogram(mapping = aes(x = Age,
+                               fill = Cardio),
+                 bins = 20,
+                 position = "dodge") +
+  scale_fill_manual(values = mycolors2) +
+  labs(title = "Age Distribution relative to Cardiovascular Disease",
+       x = "Age (years)",
+       y = "Population Count")
+
+mycardio %>%
+  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
+  filter(Height < 80) %>%
+  filter(Height > 50) %>%
+  ggplot() +
+  geom_histogram(mapping = aes(x = Height,
+                               fill = Cardio),
+                 bins = 20,
+                 position = "dodge") +
+  scale_fill_manual(values = mycolors2) +
+  labs(title = "Height Distribution relative to Cardiovascular Disease",
+       x = "Height (inches)",
+       y = "Population Count")
+```
 
 ----
 
@@ -171,16 +217,31 @@ mycardio %>%
        x = "Systolic blood pressure (mmHg)",
        y = "Diastolic blood pressure (mmHg)") 
 
-# mycardio %>%
-#   filter(Cholesterol == "1" & Glucose == "1" & `Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
-#   filter(Weight < 500) %>%
-#   ggplot() +
-#   geom_point(mapping = aes(x = `Systolic blood pressure`,
-#                            y = `Diastolic blood pressure`,
-#                            color = Cardio),
-#              alpha = 0.1) +
-#   scale_color_manual(values = mycolors) +
-#   labs(title = "Blood Pressure with Cardiovascular Disease")
+mycardio %>%
+  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
+  filter(Weight < 500) %>%
+  ggplot() +
+  geom_point(mapping = aes(x = `Systolic blood pressure`,
+                           y = Height,
+                           color = Cardio),
+             alpha = 0.1) +
+  scale_color_manual(values = mycolors) +
+  labs(title = "Heights affect on Cardiovascular Disease",
+       x = "Systolic blood pressure (mmHg)",
+       y = "Height (inches)")
+
+mycardio %>%
+  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
+  filter(Weight < 500) %>%
+  ggplot() +
+  geom_point(mapping = aes(x = `Systolic blood pressure`,
+                           y = Weight,
+                           color = Cardio),
+             alpha = 0.1) +
+  scale_color_manual(values = mycolors) +
+  labs(title = "Weights affect on Cardiovascular Disease",
+       x = "Systolic blood pressure (mmHg)",
+       y = "Weight (lbs)")
 ```
 
 ----
