@@ -33,6 +33,7 @@ cardio <- read_csv2("data/cardio_train.csv")
 vital <- read_csv("data/Data1.csv")
 ```
 
+
 ```{r cardioHandeling, echo=FALSE,warning=FALSE,message=FALSE}
 mycardio <- cardio %>%
   rename("ID" = id,
@@ -120,6 +121,11 @@ percentLife <- bind_rows(actFe, actMa, alcFe, alcMa, cardFe, cardMa, smoFe, smoM
 percentLife$Occurance <- NULL
 ```
 
+
+----
+
+## W
+
 ```{r lifestyleGraph,echo=FALSE,warning=FALSE,message=FALSE}
 percentLife %>%
   filter(Lifestyle == "Active" | Lifestyle == "Alcohol" | Lifestyle == "Smoke") %>%
@@ -137,6 +143,9 @@ percentLife %>%
 
 
 ----
+
+## How are systolic and diastolic blood pressure indicators of Cardiovascular Disease?
+
 ```{r bloodpressureGraph,echo=FALSE,warning=FALSE,message=FALSE}
 mycolors <- c("green", "red")
 
@@ -150,7 +159,10 @@ mycardio %>%
                            color = Cardio),
              alpha = 0.1) +
   scale_color_manual(values = mycolors) +
-  labs(title = "Blood Pressure with Cardiovascular Disease")
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(title = "Blood Pressure with Cardiovascular Disease",
+       x = "Systolic blood pressure (mmHg)",
+       y = "Diastolic blood pressure (mmHg)") 
 
 # mycardio %>%
 #   filter(Cholesterol == "1" & Glucose == "1" & `Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
@@ -167,6 +179,7 @@ mycardio %>%
 ----
 
 ## Which states have the highest average mortality from various cardiovascular dieases?
+
 ```{r vitalHandling, echo=FALSE}
 rate<- vital%>%
   select(GeoLocation,LocationAbbr,Topic,Data_Value_Type,Data_Value,Break_Out_Category,Break_Out) %>%
@@ -210,6 +223,7 @@ state_avg_highest %>%
 ---
 
 ## Which gender has the highest average mortality from various cardiovascular diseases?
+
 ```{r GenderMortality,echo=FALSE}
 Gender_average <- rate%>% 
   filter(Break_Out_Category=="Gender",Data_Value_Type=="Age-Standardized") %>%
