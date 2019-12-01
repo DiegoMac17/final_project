@@ -26,7 +26,6 @@ library(rmarkdown)
 library(htmltools)
 library(tinytex)
 library(knitr)
-webshot::install_phantomjs()
 ```
 
 ```{r readingData, echo=FALSE, warning=FALSE, message=FALSE}
@@ -121,12 +120,6 @@ percentLife <- bind_rows(actFe, actMa, alcFe, alcMa, cardFe, cardMa, smoFe, smoM
 percentLife$Occurance <- NULL
 ```
 
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## What are lifestyle percentages by gender, and what factors affect Cardiovascular disease incidence?
 
 ```{r lifestyleGraph,echo=FALSE,warning=FALSE,message=FALSE}
@@ -247,13 +240,6 @@ mycardio %>%
        x = "Systolic blood pressure (mmHg)",
        y = "Weight (lbs)")
 ```
-
-
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## Which states have the highest average mortality from various Cardiovascular diseases?
 
 ```{r vitalHandling, echo=FALSE}
@@ -296,12 +282,6 @@ state_avg_highest %>%
   guides(fill=FALSE)
 ```
 
-
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## Which gender has the highest average mortality from various Cardiovascular diseases?
 
 ```{r GenderMortality,echo=FALSE}
@@ -324,9 +304,6 @@ Gender_average %>%
   guides(fill=FALSE)
 ```
 
-
-
-
 ```{r dataPrepareJoinPlot, echo=FALSE,message=FALSE,warning=FALSE}
 #Select relevant variables from vital dataset
 vitalJoinPlot <- vital%>%
@@ -346,7 +323,6 @@ vitalJoinPlot <- vitalJoinPlot%>% mutate(GeoLocation = str_remove_all(GeoLocatio
   na.omit()
 
 ```
-
 
 
 ### What is the mortality per state due to Cardiovascular diseases?
@@ -386,13 +362,6 @@ deathRateMapUS %>%
 
 ```
 
-
-
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## What is the relation between age groups, life styles, Cardiovascular disease and death rates?
 ```{r lifestyleJoinDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
 #Relation between age groups and life styles and cardivascular disease
@@ -460,13 +429,6 @@ vital_cardio_join_plot %>%
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-<<<<<<< HEAD
-
-
-
-
-=======
->>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## What is the average mortality by state?
 Rates are expressed as per 100,000 population
 ```{r leafletMapAvgDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
