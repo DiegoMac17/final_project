@@ -34,7 +34,6 @@ cardio <- read_csv2("data/cardio_train.csv")
 vital <- read_csv("data/Data1.csv")
 ```
 
-
 ```{r cardioHandeling, echo=FALSE,warning=FALSE,message=FALSE}
 mycardio <- cardio %>%
   rename("ID" = id,
@@ -122,9 +121,12 @@ percentLife <- bind_rows(actFe, actMa, alcFe, alcMa, cardFe, cardMa, smoFe, smoM
 percentLife$Occurance <- NULL
 ```
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## What are lifestyle percentages by gender, and what factors affect Cardiovascular disease incidence?
 
 ```{r lifestyleGraph,echo=FALSE,warning=FALSE,message=FALSE}
@@ -149,9 +151,12 @@ percentLife %>%
        y = "Percentage")
 ```
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## How are systolic and diastolic blood pressure indicators of Cardiovascular Disease?
 
 ```{r bloodpressureGraph,echo=FALSE,warning=FALSE,message=FALSE}
@@ -186,6 +191,10 @@ mycardio %>%
 
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## Which states have the highest average mortality from various Cardiovascular diseases?
 
 ```{r vitalHandling, echo=FALSE}
@@ -230,6 +239,10 @@ state_avg_highest %>%
 
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## Which gender has the highest average mortality from various Cardiovascular diseases?
 
 ```{r GenderMortality,echo=FALSE}
@@ -317,6 +330,10 @@ deathRateMapUS %>%
 
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## What is the relation between age groups, life styles, Cardiovascular disease and death rates?
 ```{r lifestyleJoinDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
 #Relation between age groups and life styles and cardivascular disease
@@ -384,10 +401,13 @@ vital_cardio_join_plot %>%
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
+<<<<<<< HEAD
 
 
 
 
+=======
+>>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## What is the average mortality by state?
 Rates are expressed as per 100,000 population
 ```{r leafletMapAvgDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
