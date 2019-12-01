@@ -148,7 +148,7 @@ percentLife %>%
        y = "Percentage")
 ```
 
-## Distributions of Lifestyles with Cardiovascular Disease
+## Distributions of Lifestyles with Cardiovascular Disease 
 
 ```{r lifestyleHisto,echo=FALSE,warning=FALSE,message=FALSE}
 mycolors2 <- c("green3", "red1")
