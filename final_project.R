@@ -86,13 +86,6 @@ Gender_average %>%
   theme(plot.title = element_text(hjust = 0.5,size = 25))+
   guides(fill=FALSE)
 
-
-
-
-temp %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
-  addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
-
-
 #####Isaiah's Code####
 
 #Cardio Code
