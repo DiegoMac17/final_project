@@ -1,5 +1,5 @@
 ---
-title: "Mortality and Lifestyle in the US related to cardiovascular diseases"
+title: "Mortality and Lifestyle in the US related to Cardiovascular diseases"
 author: "Diego Reyes, Isaiah Vaughnn, James Tweedle"
 date: "12/2/2019"
 output: 
