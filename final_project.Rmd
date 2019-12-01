@@ -26,7 +26,6 @@ library(rmarkdown)
 library(htmltools)
 library(tinytex)
 library(knitr)
-webshot::install_phantomjs()
 ```
 
 ```{r readingData, echo=FALSE, warning=FALSE, message=FALSE}
@@ -203,7 +202,8 @@ mycardio %>%
 
 ## How are systolic and diastolic blood pressure indicators of Cardiovascular Disease?
 
-```{r bloodpressureGraph,echo=FALSE,warning=FALSE,message=FALSE
+
+```{r bloodpressureGraph,echo=FALSE,warning=FALSE,message=FALSE}
 mycolors <- c("green", "red")
 
 
@@ -250,10 +250,7 @@ mycardio %>%
 
 
 
-<<<<<<< HEAD
-=======
 
->>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## Which states have the highest average mortality from various Cardiovascular diseases?
 
 ```{r vitalHandling, echo=FALSE}
