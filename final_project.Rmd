@@ -132,14 +132,21 @@ percentLife %>%
   filter(Lifestyle == "Active" | Lifestyle == "Alcohol" | Lifestyle == "Smoke") %>%
   ggplot() +
   geom_bar(mapping = aes(x = Gender, y = percent, fill = Lifestyle), stat = "identity") +
-  facet_wrap(~Lifestyle, scales = "free_y")
+  facet_wrap(~Lifestyle, scales = "free_y") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(title = "Comparing Percentages of each Lifestyle by Gender",
+       y = "Percentage")
+  
 
 percentLife %>%
   filter(Lifestyle == "Cardio") %>%
   ggplot() +
   geom_bar(mapping = aes(x = Gender, y = percent, fill = percent), stat = "identity") +
   scale_fill_distiller(palette = "Spectral") +
-  labs(title = "Percentage of Gender with Cardiovascular Disease")
+  theme(plot.title = element_text(hjust = 0.5)) +
+  guides(fill = FALSE) +
+  labs(title = "Percentage of Gender with Cardiovascular Disease",
+       y = "Percentage")
 ```
 
 
