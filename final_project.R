@@ -41,7 +41,7 @@ rate<- vital%>%
 
 #average mortality rate for each state by topic
 state_avg <- rate %>% 
-  filter(Data_Value_Type=="Age-Standardized",Topic!="Major Cardiovascular Disease") %>% 
+  filter(Data_Value_Type=="Age-Standardized") %>% 
   group_by(Topic,State) %>% 
   summarise(avg=mean(Data_Value)) %>% 
   mutate(pct=avg/1000)
@@ -60,14 +60,15 @@ state_avg_highest %>%
   coord_flip()+
   labs(title = "Average Mortality Among States",
        x=element_blank())+
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5))+
+  guides(fill=FALSE)
 
 
 
 ####Which gender has the highest average mortality rate for each topic####
 #find the average mortality rate among genders for each topic
 Gender_average <- rate%>% 
-  filter(Break_Out_Category=="Gender",Topic!="Major Cardiovascular Disease",Data_Value_Type=="Age-Standardized") %>%
+  filter(Break_Out_Category=="Gender",Data_Value_Type=="Age-Standardized") %>%
   select(-Break_Out_Category) %>% 
   rename(Gender = Break_Out) %>% 
   group_by(Topic,Gender) %>% 

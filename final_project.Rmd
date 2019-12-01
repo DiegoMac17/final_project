@@ -1,15 +1,15 @@
 ---
-title: "Mortality and Lifestyle in the US related to cardiovascular diseases"
-author: "Diego Reyes, Isiah Vaughnn, James Tweedle"
-date: "11/14/2019"
-output:
-  html_document: default 
+title: "Mortality and Lifestyle in the US related to Cardiovascular diseases"
+author: "Diego Reyes, Isaiah Vaughnn, James Tweedle"
+date: "12/2/2019"
+output: 
+  html_document: default
   pdf_document: default
 knit:
   rmarkdown::render("final_project.Rmd",output_format="all")
 ---
 
-----
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -26,13 +26,13 @@ library(rmarkdown)
 library(htmltools)
 library(tinytex)
 library(knitr)
+webshot::install_phantomjs()
 ```
 
 ```{r readingData, echo=FALSE, warning=FALSE, message=FALSE}
 cardio <- read_csv2("data/cardio_train.csv")
 vital <- read_csv("data/Data1.csv")
 ```
-
 
 ```{r cardioHandeling, echo=FALSE,warning=FALSE,message=FALSE}
 mycardio <- cardio %>%
@@ -121,9 +121,12 @@ percentLife <- bind_rows(actFe, actMa, alcFe, alcMa, cardFe, cardMa, smoFe, smoM
 percentLife$Occurance <- NULL
 ```
 
+<<<<<<< HEAD
 
-----
 
+
+=======
+>>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## What are lifestyle percentages by gender, and what factors affect Cardiovascular disease incidence?
 
 ```{r lifestyleGraph,echo=FALSE,warning=FALSE,message=FALSE}
@@ -148,6 +151,7 @@ percentLife %>%
        y = "Percentage")
 ```
 
+<<<<<<< HEAD
 ## Distributions of Lifestyles with Cardiovascular Disease
 
 ```{r lifestyleHisto,echo=FALSE,warning=FALSE,message=FALSE}
@@ -196,9 +200,14 @@ mycardio %>%
        x = "Height (inches)",
        y = "Population Count")
 ```
+=======
+<<<<<<< HEAD
 
-----
+>>>>>>> 69083fe243f6efb4bfe3c3226f4aaa94a60eb4d3
 
+
+=======
+>>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## How are systolic and diastolic blood pressure indicators of Cardiovascular Disease?
 
 ```{r bloodpressureGraph,echo=FALSE,warning=FALSE,message=FALSE}
@@ -246,9 +255,13 @@ mycardio %>%
        y = "Weight (lbs)")
 ```
 
-----
 
-## Which states have the highest average mortality from various cardiovascular dieases?
+
+<<<<<<< HEAD
+=======
+
+>>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
+## Which states have the highest average mortality from various Cardiovascular diseases?
 
 ```{r vitalHandling, echo=FALSE}
 rate<- vital%>%
@@ -290,9 +303,13 @@ state_avg_highest %>%
   guides(fill=FALSE)
 ```
 
----
 
-## Which gender has the highest average mortality from various cardiovascular diseases?
+
+<<<<<<< HEAD
+=======
+
+>>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
+## Which gender has the highest average mortality from various Cardiovascular diseases?
 
 ```{r GenderMortality,echo=FALSE}
 Gender_average <- rate%>% 
@@ -315,7 +332,7 @@ Gender_average %>%
 ```
 
 
----
+
 
 ```{r dataPrepareJoinPlot, echo=FALSE,message=FALSE,warning=FALSE}
 #Select relevant variables from vital dataset
@@ -339,7 +356,7 @@ vitalJoinPlot <- vitalJoinPlot%>% mutate(GeoLocation = str_remove_all(GeoLocatio
 
 
 
-### What is the mortality per state due to cardiovascular diseases?
+### What is the mortality per state due to Cardiovascular diseases?
 
 ``` {r mapUSAvgDeathRate, echo = FALSE, warning=FALSE,message=FALSE }
 #Select only age standardized data and obtain average death rate per state
@@ -377,9 +394,13 @@ deathRateMapUS %>%
 ```
 
 
-----
 
-## What is the relation between age groups, life styles, cardivascular disease and death rates?
+
+<<<<<<< HEAD
+=======
+
+>>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
+## What is the relation between age groups, life styles, Cardiovascular disease and death rates?
 ```{r lifestyleJoinDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
 #Relation between age groups and life styles and cardivascular disease
 
@@ -446,10 +467,13 @@ vital_cardio_join_plot %>%
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
+<<<<<<< HEAD
 
 
-----
 
+
+=======
+>>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## What is the average mortality by state?
 Rates are expressed as per 100,000 population
 ```{r leafletMapAvgDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
