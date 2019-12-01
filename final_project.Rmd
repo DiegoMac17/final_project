@@ -1,5 +1,5 @@
 ---
-title: "The Correlation of Mortality and Lifestyle"
+title: "Mortality and Lifestyle in the US related to cardiovascular diseases"
 author: "Diego Reyes, Isiah Vaughnn, James Tweedle"
 date: "11/14/2019"
 output:
@@ -269,7 +269,7 @@ vitalJoinPlot <- vitalJoinPlot%>% mutate(GeoLocation = str_remove_all(GeoLocatio
 
 
 
-## map of the US for avg death rate (heat map)
+### What is the mortality per state due to cardiovascular diseases?
 
 ``` {r mapUSAvgDeathRate, echo = FALSE, warning=FALSE,message=FALSE }
 #Select only age standardized data and obtain average death rate per state
@@ -309,7 +309,7 @@ deathRateMapUS %>%
 
 ----
 
-## Relation between age groups, life styles, cardivascular disease and death rates
+## What is the relation between age groups, life styles, cardivascular disease and death rates?
 ```{r lifestyleJoinDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
 #Relation between age groups and life styles and cardivascular disease
 
@@ -380,9 +380,8 @@ vital_cardio_join_plot %>%
 
 ----
 
-## What is the average mortality by state leaflet map
-
-### 
+## What is the average mortality by state?
+Rates are expressed as per 100,000 population
 ```{r leafletMapAvgDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
 #Select relevant variables
 vital_avg_state_all <- vital%>%
