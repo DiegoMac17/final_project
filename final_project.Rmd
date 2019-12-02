@@ -120,12 +120,7 @@ percentLife <- bind_rows(actFe, actMa, alcFe, alcMa, cardFe, cardMa, smoFe, smoM
 percentLife$Occurance <- NULL
 ```
 
-<<<<<<< HEAD
 
-
-
-=======
->>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## What are lifestyle percentages by gender, and what factors affect Cardiovascular disease incidence?
 
 ```{r lifestyleGraph,echo=FALSE,warning=FALSE,message=FALSE}
@@ -274,7 +269,6 @@ rate<- vital%>%
 ```
 
 
-
 ```{r StateMortality, echo=FALSE}
 state_avg <- rate %>% 
   filter(Data_Value_Type=="Age-Standardized") %>% 
@@ -322,8 +316,6 @@ Gender_average %>%
 ```
 
 
-
-
 ```{r dataPrepareJoinPlot, echo=FALSE,message=FALSE,warning=FALSE}
 #Select relevant variables from vital dataset
 vitalJoinPlot <- vital%>%
@@ -344,16 +336,15 @@ vitalJoinPlot <- vitalJoinPlot%>% mutate(GeoLocation = str_remove_all(GeoLocatio
 
 ```
 
-<<<<<<< HEAD
+
 ### What is the mortality among states due to Cardiovascular diseases?
 In this map we can see how the southern states of the US are more affected by cardiovascular diseases, probably because of food or lifestyle.
 From our dataset we can see that, unfortunately Mississippi, has the highest mortality rate for cardiovascular diseases with 160 per 100,000 population.
 The state with the lowest cardiovascular mortality rate is Alaska with a rate of 80 per 100,000
-=======
+
 
 
 ### What is the mortality per state due to Cardiovascular diseases?
->>>>>>> c6f9bad140958410ac734f26916643c8c04e7634
 
 ``` {r mapUSAvgDeathRate, echo = FALSE, warning=FALSE,message=FALSE }
 #Select only age standardized data and obtain average death rate per state
@@ -391,17 +382,9 @@ deathRateMapUS %>%
 ```
 
 
-<<<<<<< HEAD
 ## What is the relationship between age groups, life styles, Cardiovascular disease and death rates?
 As we can see on the graph there is a significant increase in the percent of people with cardiovascular disease for the second age group, and a similar trend can be seen for the mortality rate. While there is a decrease in activity from the first to second age group, it is a very small change compared to the others. It can be interpreted as that there might be other relevant factors that impact cardiovascular diseases and death rates rather than only activity.
-=======
->>>>>>> c6f9bad140958410ac734f26916643c8c04e7634
 
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## What is the relation between age groups, life styles, Cardiovascular disease and death rates?
 ```{r lifestyleJoinDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
 #Relation between age groups and life styles and cardivascular disease
@@ -469,20 +452,10 @@ vital_cardio_join_plot %>%
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-<<<<<<< HEAD
 
-
-
-
-=======
->>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## What is the average mortality by state?
-Rates are expressed as per 100,000 population
-<<<<<<< HEAD
-We wanted to display the different topics or diseases analyzed in the dataset to compare the mortality rates by topic for each state. With a leaflet map we were able to add labels to each state to show the mortality rates per topic in an interactive map.
+Rates are expressed as per 100,000 population. We wanted to display the different topics or diseases analyzed in the dataset to compare the mortality rates by topic for each state. With a leaflet map we were able to add labels to each state to show the mortality rates per topic in an interactive map.
 
-=======
->>>>>>> c6f9bad140958410ac734f26916643c8c04e7634
 ```{r leafletMapAvgDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
 #Select relevant variables
 vital_avg_state_all <- vital%>%
