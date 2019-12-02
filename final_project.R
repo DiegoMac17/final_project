@@ -23,7 +23,7 @@ vital <- read_csv("data/Data1.csv")
 
 #wrangle the data####
 rate<- vital%>%
-  select(GeoLocation,LocationAbbr,Topic,Data_Value_Type,Data_Value,Break_Out_Category,Break_Out) %>%
+  select(GeoLocation,LocationAbbr,Topic,Data_Value_Type,Data_Value,Break_Out_Category,Break_Out,Year) %>%
   mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
                         GeoLocation = str_remove_all(GeoLocation, "\\)"),
          Topic=case_when(Topic=="Diseases of the Heart (Heart Disease)"~"Heart Disease",
@@ -35,7 +35,22 @@ rate<- vital%>%
   rename("State"=LocationAbbr) %>% 
   na.omit()
 
+####Has the average mortality rate from Cardiovascular Disease in the United States increased/decreased from 2000-2017?
+yearly_avg <- rate %>% 
+  filter(Break_Out!="18-24",Break_Out!="25-44",Break_Out!="45-64") %>% 
+  group_by(Year,Break_Out_Category,Break_Out) %>% 
+  summarise(avg=mean(Data_Value))
 
+yearly_avg %>% 
+  ggplot(aes(Year,avg,color=Break_Out))+
+  geom_point()+
+  geom_line(linetype="dotted")+
+  facet_wrap(~Break_Out_Category,scales = "free")+
+  labs(title = "Average Mortality from Cardiovascular Disease in the US",
+       subtitle = "2000-2017")+
+  guides(color=FALSE)+
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
 
 ####Which states have the highest average mortality rates for each topic####
 
@@ -343,6 +358,43 @@ vitalJoinPlot <- vitalJoinPlot%>% mutate(GeoLocation = str_remove_all(GeoLocatio
          Longitude = as.numeric(Longitude)) %>% 
   na.omit()
 
+<<<<<<< HEAD
+=======
+
+
+
+####What lifestyle combination has the highest mortality rates for stroke in male and female ?####
+stroke_gender <- vitalGender %>%
+  filter(Topic == "Stroke") %>% group_by(Gender) %>%
+  summarise(avg_deathRate = mean(Data_Value))
+
+
+cardioJoin <- mycardio %>%
+  group_by(Gender, Smoke, Alcohol, Active ,Cardio) %>% summarise(n = n())
+
+
+stroke_lifestyle <- left_join(cardioJoin, stroke_gender)
+
+plot_stroke_f <- stroke_lifestyle %>% filter(Gender=="Female") %>%
+  arrange(desc(n)) %>% head(1)
+plot_stroke_m <- stroke_lifestyle %>% filter(Gender=="Male") %>%
+  arrange(desc(n)) %>% head(1)
+
+plot_stroke <- bind_rows(plot_stroke_m,plot_stroke_f)
+
+plot_stroke %>% ggplot() +
+  geom_col(aes(x=Gender, y= n, fill = avg_deathRate))
+
+
+
+#### map of the us for stroke avg death rate ####
+strokeM <- vitalGender %>% filter(Topic == "Stroke", Gender == "Male",Data_Value_Type=="Age-Standardized") %>%
+
+#### map of the us for stroke avg death rate (heat map) ####
+strokeM <- vitalGender %>% filter(Data_Value_Type=="Age-Standardized") %>%
+  group_by(LocationAbbr) %>% summarise(avg_deathRate = mean(Data_Value)) %>% rename(state = LocationAbbr)
+
+>>>>>>> 347d3a317c824574baa0b4788f1092c4356f5a3c
 #### map of the US for stroke avg death rate (heat map) ####
 #Select only age standardized data and obtain average death rate per state
 deathRateMap <- vitalJoinPlot %>%
