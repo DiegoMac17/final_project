@@ -23,7 +23,7 @@ vital <- read_csv("data/Data1.csv")
 
 #wrangle the data####
 rate<- vital%>%
-  select(GeoLocation,LocationAbbr,Topic,Data_Value_Type,Data_Value,Break_Out_Category,Break_Out) %>%
+  select(GeoLocation,LocationAbbr,Topic,Data_Value_Type,Data_Value,Break_Out_Category,Break_Out,Year) %>%
   mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
                         GeoLocation = str_remove_all(GeoLocation, "\\)"),
          Topic=case_when(Topic=="Diseases of the Heart (Heart Disease)"~"Heart Disease",
@@ -37,6 +37,22 @@ rate<- vital%>%
 
 
 
+#Has the average mortality rate from Cardiovascular Disease in the United States increased/decreased from 2000-2017?
+yearly_avg<- rate %>% 
+  filter(Break_Out!="18-24",Break_Out!="25-44",Break_Out!="45-64") %>% 
+  group_by(Year,Break_Out_Category,Break_Out) %>% 
+  summarise(avg=mean(Data_Value))
+
+yearly_avg %>% 
+  ggplot(aes(Year,avg,color=Break_Out))+
+  geom_point()+
+  geom_line(linetype="dotted")+
+  facet_wrap(~Break_Out_Category,scales = "free")+
+  labs(title = "Average Mortality from Cardiovascular Disease in the US",
+        subtitle="2000-2017")+
+  guides(color=FALSE)+
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
 ####Which states have the highest average mortality rates for each topic####
 
 #average mortality rate for each state by topic
@@ -85,13 +101,6 @@ Gender_average %>%
        x=element_blank())+
   theme(plot.title = element_text(hjust = 0.5,size = 25))+
   guides(fill=FALSE)
-
-
-
-
-temp %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
-  addTiles() %>% setView(-98.00,38.71,zoom=4) %>% addMarkers(~Longitude, ~Latitude)
-
 
 #####Isaiah's Code####
 
