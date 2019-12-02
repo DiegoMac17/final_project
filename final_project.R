@@ -341,39 +341,6 @@ cardio %>%
   top_n(10)
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-# temp %>% 
-#   filter(Topic=="Acute Myocardial Infarction (Heart Attack)" & Year==2000 & LocationAbbr=="AL") %>% 
-#   view()
-# temp1 <-  temp%>% 
-#   group_by(LocationAbbr,Topic) %>% 
-#   summarise(avg=mean(Data_Value)) %>% 
-#   arrange(Topic)
-# 
-# temp2 <- temp1 %>% 
-#   group_by(Topic) %>% 
-#   top_n(5,avg)
-# temp2 %>% 
-#   ggplot()+
-#   geom_col(aes(reorder(LocationAbbr,avg),avg,fill=Topic))+
-#   coord_flip()+
-#   labs(title = "Coronary Heart Disease")+
-#   facet_wrap(~Topic,scales = "free",ncol = 3)
-=======
-
->>>>>>> ee95eb35e37c0e7ec1cc6de0f609a48a7f807fd9
-
-
-
-
-
-
-
-
-
-=======
->>>>>>> bfa99871dc234a39f45d8891ce0956ad52fbb37b
 ####Joining and mapping####
 #Select relevant variables from vital dataset
 vitalJoinPlot <- vital%>%
@@ -393,48 +360,14 @@ vitalJoinPlot <- vitalJoinPlot%>% mutate(GeoLocation = str_remove_all(GeoLocatio
   na.omit()
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-
-####What lifestyle combination has the highest mortality rates for stroke in male and female ?####
-stroke_gender <- vitalGender %>%
-  filter(Topic == "Stroke") %>% group_by(Gender) %>%
-  summarise(avg_deathRate = mean(Data_Value))
-
-
-cardioJoin <- mycardio %>%
-  group_by(Gender, Smoke, Alcohol, Active ,Cardio) %>% summarise(n = n())
-
-
-stroke_lifestyle <- left_join(cardioJoin, stroke_gender)
-
-plot_stroke_f <- stroke_lifestyle %>% filter(Gender=="Female") %>%
-  arrange(desc(n)) %>% head(1)
-plot_stroke_m <- stroke_lifestyle %>% filter(Gender=="Male") %>%
-  arrange(desc(n)) %>% head(1)
-
-plot_stroke <- bind_rows(plot_stroke_m,plot_stroke_f)
-
-plot_stroke %>% ggplot() +
-  geom_col(aes(x=Gender, y= n, fill = avg_deathRate))
-
-
-
-#### map of the us for stroke avg death rate ####
-strokeM <- vitalGender %>% filter(Topic == "Stroke", Gender == "Male",Data_Value_Type=="Age-Standardized") %>%
-=======
-#### map of the us for stroke avg death rate (heat map) ####
-
 #### map of the US for stroke avg death rate (heat map) ####
 #Select only age standardized data and obtain average death rate per state
 deathRateMap <- vitalJoinPlot %>%
   filter(Data_Value_Type=="Age-Standardized") %>%
   group_by(LocationAbbr) %>%
   summarise(avg_deathRate = mean(Data_Value)) %>% rename(state = LocationAbbr)
->>>>>>> e0d3b34053ab154221f745d3bd55713768c72711
 
-#create a data fram with the us states
+#create a data frame with the us states
 us_states <- us_map("states")
 #Rename abbr to state
 us_states <- us_states %>% rename(state=abbr)

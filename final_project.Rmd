@@ -144,6 +144,9 @@ vitalJoinPlot <- vitalJoinPlot%>% mutate(GeoLocation = str_remove_all(GeoLocatio
 ```
 
 ### What is the mortality among states due to Cardiovascular diseases?
+In this map we can see how the southern states of the US are more affected by cardiovascular diseases, probably because of food or lifestyle.
+From our dataset we can see that, unfortunately Mississippi, has the highest mortality rate for cardiovascular diseases with 160 per 100,000 population.
+The state with the lowest cardiovascular mortality rate is Alaska with a rate of 80 per 100,000
 
 ``` {r mapUSAvgDeathRate, echo = FALSE, warning=FALSE,message=FALSE }
 #Select only age standardized data and obtain average death rate per state
@@ -182,6 +185,7 @@ deathRateMapUS %>%
 
 
 ## What is the relationship between age groups, life styles, Cardiovascular disease and death rates?
+As we can see on the graph there is a significant increase in the percent of people with cardiovascular disease for the second age group, and a similar trend can be seen for the mortality rate. While there is a decrease in activity from the first to second age group, it is a very small change compared to the others. It can be interpreted as that there might be other relevant factors that impact cardiovascular diseases and death rates rather than only activity.
 
 ```{r lifestyleJoinDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
 #Relation between age groups and life styles and cardivascular disease
@@ -253,6 +257,7 @@ vital_cardio_join_plot %>%
 
 ## What is the average mortality by state?
 Rates are expressed as per 100,000 population
+We wanted to display the different topics or diseases analyzed in the dataset to compare the mortality rates by topic for each state. With a leaflet map we were able to add labels to each state to show the mortality rates per topic in an interactive map.
 
 ```{r leafletMapAvgDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
 #Select relevant variables
