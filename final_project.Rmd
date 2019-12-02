@@ -186,6 +186,7 @@ deathRateMapUS %>%
 
 ## From what county does the data for Mississippi comes from and what is the average mortality rate there?
 The county is Leake county with a mortality rate of 160 per 100,000
+
 ``` {r mapMSAvgDeathRate, echo = FALSE, warning=FALSE,message=FALSE }
 #### State plot -> From what county does the data for Mississippi comes from and what is the average mortality rate there?
 #data frame for only Mississippi state and mortality rate
