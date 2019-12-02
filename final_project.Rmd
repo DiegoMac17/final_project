@@ -100,7 +100,7 @@ state_avg_highest %>%
 
 
 ## Which gender has the highest average mortality from various Cardiovascular diseases?
-Men tend to die more frequently from Cardiovascular disease having the higest rate of mortality in 4 of the 6 disease states. This could be linked to lifestyle choices that will be shown in a later graphic in this report where shows that men have higher incidences of smoking, alcohol consumption, and inactivity. 
+Men tend to die more frequently from Cardiovascular disease having the higest rate of mortality in 4 of the 6 disease states. This could be linked to lifestyle choices that will be shown in a later graphic in this report where it shows that men have higher incidences of smoking, alcohol consumption, and inactivity. 
 
 ```{r GenderMortality,echo=FALSE}
 Gender_average <- rate%>% 
