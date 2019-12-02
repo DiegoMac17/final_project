@@ -300,7 +300,7 @@ state_avg_leaflet %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
 ```
 
 
-## What are lifestyle percentages by gender, and what factors a???ect Cardiovascular disease incidence?
+## What are lifestyle percentages by gender, and what factors affect Cardiovascular disease incidence?
 
 ```{r cardioHandeling, echo=FALSE,warning=FALSE,message=FALSE}
 mycardio <- cardio %>%
