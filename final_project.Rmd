@@ -74,7 +74,7 @@ yearly_avg %>%
 
 
 ## Which states have the highest average mortality from various Cardiovascular diseases?
-The most interesting conclusion about the below graph is what I would call "repeat offenders." There are several states making it into the top for multiple Cardiovascular disease states. North Dakota is number one in three of the six states. Mississippi, Arkansas, West Virginia, and even DC show up multiple times the top 5 states. 
+The most interesting conclusion about the below graph is what I would call "repeat offenders." There are several states making it into the top 5 for multiple Cardiovascular disease states. North Dakota is number one in three of the six states. Mississippi, Arkansas, West Virginia, and even DC show up multiple times in the top 5 states. 
 ```{r StateMortality, echo=FALSE}
 state_avg <- rate %>% 
   filter(Data_Value_Type=="Age-Standardized") %>% 
@@ -503,6 +503,7 @@ mycardio %>%
        y = "Population Count")
 
 ```
+
 Conclusion: A higher percentage of females are noted to be active, while more males consume alcohol and smoke. Females have higher percentage of cardiovascular disease than males by about 0.23%.
 
 ## How are systolic and diastolic blood pressure indicators of Cardiovascular Disease?
