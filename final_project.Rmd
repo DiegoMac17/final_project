@@ -342,10 +342,6 @@ In this map we can see how the southern states of the US are more affected by ca
 From our dataset we can see that, unfortunately Mississippi, has the highest mortality rate for cardiovascular diseases with 160 per 100,000 population.
 The state with the lowest cardiovascular mortality rate is Alaska with a rate of 80 per 100,000
 
-
-
-### What is the mortality per state due to Cardiovascular diseases?
-
 ``` {r mapUSAvgDeathRate, echo = FALSE, warning=FALSE,message=FALSE }
 #Select only age standardized data and obtain average death rate per state
 deathRateMap <- vitalJoinPlot %>%
@@ -385,7 +381,6 @@ deathRateMapUS %>%
 ## What is the relationship between age groups, life styles, Cardiovascular disease and death rates?
 As we can see on the graph there is a significant increase in the percent of people with cardiovascular disease for the second age group, and a similar trend can be seen for the mortality rate. While there is a decrease in activity from the first to second age group, it is a very small change compared to the others. It can be interpreted as that there might be other relevant factors that impact cardiovascular diseases and death rates rather than only activity.
 
-## What is the relation between age groups, life styles, Cardiovascular disease and death rates?
 ```{r lifestyleJoinDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
 #Relation between age groups and life styles and cardivascular disease
 
