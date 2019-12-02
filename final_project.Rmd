@@ -33,229 +33,15 @@ cardio <- read_csv2("data/cardio_train.csv")
 vital <- read_csv("data/Data1.csv")
 ```
 
-```{r cardioHandeling, echo=FALSE,warning=FALSE,message=FALSE}
-mycardio <- cardio %>%
-  rename("ID" = id,
-         "Age" = age,
-         "Gender" = gender,
-         "Height" = height,
-         "Weight" = weight,
-         "Systolic blood pressure" = ap_hi,
-         "Diastolic blood pressure" = ap_lo,
-         "Cholesterol" = cholesterol,
-         "Glucose" = gluc,
-         "Smoke" = smoke,
-         "Alcohol" = alco,
-         "Active" = active,
-         "Cardio" = cardio)
-
-mycardio <- mycardio %>%
-  mutate(Age = as.numeric(Age)/365) %>%
-  mutate(Gender = case_when(Gender == "1" ~ "Female", 
-                            Gender == "2" ~ "Male")) %>%
-  mutate(Weight = as.numeric(Weight)*2.205/10) %>%
-  mutate(Smoke = case_when(Smoke == "0" ~ "No", 
-                           Smoke == "1" ~ "Yes")) %>%
-  mutate(Alcohol = case_when(Alcohol == "0" ~ "No", 
-                             Alcohol == "1" ~ "Yes")) %>%
-  mutate(Active = case_when(Active == "0" ~ "No", 
-                            Active == "1" ~ "Yes")) %>%
-  mutate(Cardio = case_when(Cardio == "0" ~ "No", 
-                            Cardio == "1" ~ "Yes")) %>%
-  mutate(Height = as.numeric(Height)/2.54) %>%
-  mutate(HeightFeet = floor(Height/12)) %>%
-  mutate(HeightInches = round(Height - (12*HeightFeet), 1)) %>%
-  mutate(HeightLong = paste(HeightFeet,"'",HeightInches))
-
-mycardio$HeightFeet <- NULL
-mycardio$HeightInches <- NULL
-
-mycardio <- mycardio %>%
-  select(ID:Height, HeightLong, Weight:Cardio)
-
-```
-
-```{r cardioFacet,echo=FALSE,warning=FALSE,message=FALSE}
-facetCardio <- mycardio %>%
-  select(Gender, Smoke:Cardio) %>%
-  gather("Lifestyle", "Occurance", -Gender) %>%
-  group_by(Gender, Lifestyle, Occurance) %>%
-  count()
-
-actFe <- facetCardio %>%
-  filter(Gender == "Female" & Lifestyle == "Active" & Occurance == "Yes") %>%
-  mutate(percent = n/45530) %>%
-  select(Gender, Lifestyle, percent)
-alcFe <- facetCardio %>%
-  filter(Gender == "Female" & Lifestyle == "Alcohol" & Occurance == "Yes") %>%
-  mutate(percent = n/45530) %>%
-  select(Gender, Lifestyle, percent)
-cardFe <- facetCardio %>%
-  filter(Gender == "Female" & Lifestyle == "Cardio" & Occurance == "Yes") %>%
-  mutate(percent = n/45530) %>%
-  select(Gender, Lifestyle, percent)
-smoFe <- facetCardio %>%
-  filter(Gender == "Female" & Lifestyle == "Smoke" & Occurance == "Yes") %>%
-  mutate(percent = n/45530) %>%
-  select(Gender, Lifestyle, percent)
-
-actMa <- facetCardio %>%
-  filter(Gender == "Male" & Lifestyle == "Active" & Occurance == "Yes") %>%
-  mutate(percent = n/45530) %>%
-  select(Gender, Lifestyle, percent)
-alcMa <- facetCardio %>%
-  filter(Gender == "Male" & Lifestyle == "Alcohol" & Occurance == "Yes") %>%
-  mutate(percent = n/45530) %>%
-  select(Gender, Lifestyle, percent)
-cardMa <- facetCardio %>%
-  filter(Gender == "Male" & Lifestyle == "Cardio" & Occurance == "Yes") %>%
-  mutate(percent = n/45530) %>%
-  select(Gender, Lifestyle, percent)
-smoMa <- facetCardio %>%
-  filter(Gender == "Male" & Lifestyle == "Smoke" & Occurance == "Yes") %>%
-  mutate(percent = n/45530) %>%
-  select(Gender, Lifestyle, percent)
-
-percentLife <- bind_rows(actFe, actMa, alcFe, alcMa, cardFe, cardMa, smoFe, smoMa)
-percentLife$Occurance <- NULL
-```
-
-
-## What are lifestyle percentages by gender, and what factors affect Cardiovascular disease incidence?
-
-```{r lifestyleGraph,echo=FALSE,warning=FALSE,message=FALSE}
-percentLife %>%
-  filter(Lifestyle == "Active" | Lifestyle == "Alcohol" | Lifestyle == "Smoke") %>%
-  ggplot() +
-  geom_bar(mapping = aes(x = Gender, y = percent, fill = Lifestyle), stat = "identity") +
-  facet_wrap(~Lifestyle, scales = "free_y") +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  labs(title = "Comparing Percentages of each Lifestyle by Gender",
-       y = "Percentage")
-  
-
-percentLife %>%
-  filter(Lifestyle == "Cardio") %>%
-  ggplot() +
-  geom_bar(mapping = aes(x = Gender, y = percent, fill = percent), stat = "identity") +
-  scale_fill_distiller(palette = "Spectral") +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  guides(fill = FALSE) +
-  labs(title = "Percentage of Gender with Cardiovascular Disease",
-       y = "Percentage")
-```
-
-## Distributions of Lifestyles with Cardiovascular Disease
-
-```{r lifestyleHisto,echo=FALSE,warning=FALSE,message=FALSE}
-mycolors2 <- c("green3", "red1")
-
-mycardio %>%
-  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
-  filter(Weight < 400) %>%
-  filter(Weight > 50) %>%
-  ggplot() +
-  geom_histogram(mapping = aes(x = Weight,
-                               fill = Cardio),
-                 bins = 20,
-                 position = "dodge") +
-  scale_fill_manual(values = mycolors2) +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  labs(title = "Weight Distribution Relative to Cardiovascular Disease",
-       x = "Weight (lbs)",
-       y = "Population Count")
-
-
-mycardio %>%
-  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
-  filter(Weight < 400) %>%
-  filter(Weight > 50) %>%
-  ggplot() +
-  geom_histogram(mapping = aes(x = Age,
-                               fill = Cardio),
-                 bins = 20,
-                 position = "dodge") +
-  scale_fill_manual(values = mycolors2) +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  labs(title = "Age Distribution relative to Cardiovascular Disease",
-       x = "Age (years)",
-       y = "Population Count")
-
-mycardio %>%
-  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
-  filter(Height < 80) %>%
-  filter(Height > 50) %>%
-  ggplot() +
-  geom_histogram(mapping = aes(x = Height,
-                               fill = Cardio),
-                 bins = 20,
-                 position = "dodge") +
-  scale_fill_manual(values = mycolors2) +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  labs(title = "Height Distribution relative to Cardiovascular Disease",
-       x = "Height (inches)",
-       y = "Population Count")
-
-```
-
-## How are systolic and diastolic blood pressure indicators of Cardiovascular Disease?
-
-
-```{r bloodpressureGraph,echo=FALSE,warning=FALSE,message=FALSE}
-mycolors <- c("green", "red")
-
-
-mycardio %>%
-  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
-  filter(Weight < 500) %>%
-  ggplot() +
-  geom_point(mapping = aes(x = `Systolic blood pressure`,
-                           y = `Diastolic blood pressure`,
-                           color = Cardio),
-             alpha = 0.1) +
-  scale_color_manual(values = mycolors) +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  labs(title = "Blood Pressure with Cardiovascular Disease",
-       x = "Systolic blood pressure (mmHg)",
-       y = "Diastolic blood pressure (mmHg)") 
-
-mycardio %>%
-  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
-  filter(Weight < 500) %>%
-  ggplot() +
-  geom_point(mapping = aes(x = `Systolic blood pressure`,
-                           y = Height,
-                           color = Cardio),
-             alpha = 0.1) +
-  scale_color_manual(values = mycolors) +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  labs(title = "Heights affect on Cardiovascular Disease",
-       x = "Systolic blood pressure (mmHg)",
-       y = "Height (inches)")
-
-mycardio %>%
-  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
-  filter(Weight < 500) %>%
-  ggplot() +
-  geom_point(mapping = aes(x = `Systolic blood pressure`,
-                           y = Weight,
-                           color = Cardio),
-             alpha = 0.1) +
-  scale_color_manual(values = mycolors) +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  labs(title = "Weights affect on Cardiovascular Disease",
-       x = "Systolic blood pressure (mmHg)",
-       y = "Weight (lbs)")
-```
 
 
 
-
-## Which states have the highest average mortality from various Cardiovascular diseases?
+## Has the average mortality rate from Cardiovascular Disease in the United States increased/decreased from 2000-2017?
+As seen in the graph below, mortality for multiple groups(age,sex,race) from cardiovascular disease is trending down from 2000-2017. This is likely due to the great strides seen in the field of medicine over the past 20 years. Better medicine, more evidence-based approaches, etc have all contributed to this downtrend.  
 
 ```{r vitalHandling, echo=FALSE}
 rate<- vital%>%
-  select(GeoLocation,LocationAbbr,Topic,Data_Value_Type,Data_Value,Break_Out_Category,Break_Out) %>%
+  select(GeoLocation,LocationAbbr,Topic,Data_Value_Type,Data_Value,Break_Out_Category,Break_Out,Year) %>%
   mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
                         GeoLocation = str_remove_all(GeoLocation, "\\)"),
          Topic=case_when(Topic=="Diseases of the Heart (Heart Disease)"~"Heart Disease",
@@ -268,7 +54,27 @@ rate<- vital%>%
   na.omit()
 ```
 
+```{r yearlyMortality, echo=FALSE,warning=FALSE,message=FALSE}
+yearly_avg <- rate %>% 
+  filter(Break_Out!="18-24",Break_Out!="25-44",Break_Out!="45-64") %>% 
+  group_by(Year,Break_Out_Category,Break_Out) %>% 
+  summarise(avg=mean(Data_Value))
 
+yearly_avg %>% 
+  ggplot(aes(Year,avg,color=Break_Out))+
+  geom_point()+
+  geom_line(linetype="dotted")+
+  facet_wrap(~Break_Out_Category,scales = "free")+
+  labs(title = "Average Mortality from Cardiovascular Disease in the US",
+       subtitle = "2000-2017")+
+  guides(color=FALSE)+
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+```
+
+
+## Which states have the highest average mortality from various Cardiovascular diseases?
+The most interesting conclusion about the below graph is what I would call "repeat offenders." There are several states making it into the top for multiple Cardiovascular disease states. North Dakota is number one in three of the six states. Mississippi, Arkansas, West Virginia, and even DC show up multiple times the top 5 states. 
 ```{r StateMortality, echo=FALSE}
 state_avg <- rate %>% 
   filter(Data_Value_Type=="Age-Standardized") %>% 
@@ -294,6 +100,7 @@ state_avg_highest %>%
 
 
 ## Which gender has the highest average mortality from various Cardiovascular diseases?
+Men tend to die more frequently from Cardiovascular disease having the higest rate of mortality in 4 of the 6 disease states. This could be linked to lifestyle choices that will be shown in a later graphic in this report where shows that men have higher incidences of smoking, alcohol consumption, and inactivity. 
 
 ```{r GenderMortality,echo=FALSE}
 Gender_average <- rate%>% 
@@ -385,7 +192,6 @@ deathRateMapUS %>%
 ## What is the relationship between age groups, life styles, Cardiovascular disease and death rates?
 As we can see on the graph there is a significant increase in the percent of people with cardiovascular disease for the second age group, and a similar trend can be seen for the mortality rate. While there is a decrease in activity from the first to second age group, it is a very small change compared to the others. It can be interpreted as that there might be other relevant factors that impact cardiovascular diseases and death rates rather than only activity.
 
-## What is the relation between age groups, life styles, Cardiovascular disease and death rates?
 ```{r lifestyleJoinDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
 #Relation between age groups and life styles and cardivascular disease
 
@@ -500,4 +306,233 @@ state_avg_leaflet %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
   addTiles() %>% setView(-98.00,38.71,zoom=4) %>%
   addMarkers(~Longitude, ~Latitude, label = state_label, popup = state_label)
 ```
+
+
+
+```{r cardioHandeling, echo=FALSE,warning=FALSE,message=FALSE}
+mycardio <- cardio %>%
+  rename("ID" = id,
+         "Age" = age,
+         "Gender" = gender,
+         "Height" = height,
+         "Weight" = weight,
+         "Systolic blood pressure" = ap_hi,
+         "Diastolic blood pressure" = ap_lo,
+         "Cholesterol" = cholesterol,
+         "Glucose" = gluc,
+         "Smoke" = smoke,
+         "Alcohol" = alco,
+         "Active" = active,
+         "Cardio" = cardio)
+
+mycardio <- mycardio %>%
+  mutate(Age = as.numeric(Age)/365) %>%
+  mutate(Gender = case_when(Gender == "1" ~ "Female", 
+                            Gender == "2" ~ "Male")) %>%
+  mutate(Weight = as.numeric(Weight)*2.205/10) %>%
+  mutate(Smoke = case_when(Smoke == "0" ~ "No", 
+                           Smoke == "1" ~ "Yes")) %>%
+  mutate(Alcohol = case_when(Alcohol == "0" ~ "No", 
+                             Alcohol == "1" ~ "Yes")) %>%
+  mutate(Active = case_when(Active == "0" ~ "No", 
+                            Active == "1" ~ "Yes")) %>%
+  mutate(Cardio = case_when(Cardio == "0" ~ "No", 
+                            Cardio == "1" ~ "Yes")) %>%
+  mutate(Height = as.numeric(Height)/2.54) %>%
+  mutate(HeightFeet = floor(Height/12)) %>%
+  mutate(HeightInches = round(Height - (12*HeightFeet), 1)) %>%
+  mutate(HeightLong = paste(HeightFeet,"'",HeightInches))
+
+mycardio$HeightFeet <- NULL
+mycardio$HeightInches <- NULL
+
+mycardio <- mycardio %>%
+  select(ID:Height, HeightLong, Weight:Cardio)
+
+```
+
+```{r cardioFacet,echo=FALSE,warning=FALSE,message=FALSE}
+facetCardio <- mycardio %>%
+  select(Gender, Smoke:Cardio) %>%
+  gather("Lifestyle", "Occurance", -Gender) %>%
+  group_by(Gender, Lifestyle, Occurance) %>%
+  count()
+
+actFe <- facetCardio %>%
+  filter(Gender == "Female" & Lifestyle == "Active" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+alcFe <- facetCardio %>%
+  filter(Gender == "Female" & Lifestyle == "Alcohol" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+cardFe <- facetCardio %>%
+  filter(Gender == "Female" & Lifestyle == "Cardio" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+smoFe <- facetCardio %>%
+  filter(Gender == "Female" & Lifestyle == "Smoke" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+
+actMa <- facetCardio %>%
+  filter(Gender == "Male" & Lifestyle == "Active" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+alcMa <- facetCardio %>%
+  filter(Gender == "Male" & Lifestyle == "Alcohol" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+cardMa <- facetCardio %>%
+  filter(Gender == "Male" & Lifestyle == "Cardio" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+smoMa <- facetCardio %>%
+  filter(Gender == "Male" & Lifestyle == "Smoke" & Occurance == "Yes") %>%
+  mutate(percent = n/45530) %>%
+  select(Gender, Lifestyle, percent)
+
+percentLife <- bind_rows(actFe, actMa, alcFe, alcMa, cardFe, cardMa, smoFe, smoMa)
+percentLife$Occurance <- NULL
+```
+
+
+## What are lifestyle percentages by gender, and what factors affect Cardiovascular disease incidence?
+There is a higher percentage of males who smoke and consume alcohol, and a higher percentage of females that are reported active.There is higher incidence of cardiovascular disease in females by about 0.23%.
+
+
+
+```{r lifestyleGraph,echo=FALSE,warning=FALSE,message=FALSE}
+percentLife %>%
+  filter(Lifestyle == "Active" | Lifestyle == "Alcohol" | Lifestyle == "Smoke") %>%
+  ggplot() +
+  geom_bar(mapping = aes(x = Gender, y = percent, fill = Lifestyle), stat = "identity") +
+  facet_wrap(~Lifestyle, scales = "free_y") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(title = "Comparing Percentages of each Lifestyle by Gender",
+       y = "Percentage")
+  
+
+percentLife %>%
+  filter(Lifestyle == "Cardio") %>%
+  ggplot() +
+  geom_bar(mapping = aes(x = Gender, y = percent, fill = percent), stat = "identity") +
+  scale_fill_distiller(palette = "Spectral") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  guides(fill = FALSE) +
+  labs(title = "Percentage of Gender with Cardiovascular Disease",
+       y = "Percentage")
+```
+
+## Distributions of Lifestyles with Cardiovascular Disease
+Weights are concentrated around 120 to 140. The distribution is right skewed. After a weight of ~165 there is a higher number of having cardiovascular disease than not.The median is around 55 years of age. The distribution is mostly left skewed. After the age of 55 there is a higher number of having cardiovascular disease than not.This distribution is multimodal most likely due to the two genders each having different average heights. Cardiovascular disease incidence is mostly unrelated to height.
+
+
+
+
+```{r lifestyleHisto,echo=FALSE,warning=FALSE,message=FALSE}
+mycolors2 <- c("green3", "red1")
+
+mycardio %>%
+  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
+  filter(Weight < 400) %>%
+  filter(Weight > 50) %>%
+  ggplot() +
+  geom_histogram(mapping = aes(x = Weight,
+                               fill = Cardio),
+                 bins = 20,
+                 position = "dodge") +
+  scale_fill_manual(values = mycolors2) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(title = "Weight Distribution Relative to Cardiovascular Disease",
+       x = "Weight (lbs)",
+       y = "Population Count")
+
+
+mycardio %>%
+  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
+  filter(Weight < 400) %>%
+  filter(Weight > 50) %>%
+  ggplot() +
+  geom_histogram(mapping = aes(x = Age,
+                               fill = Cardio),
+                 bins = 20,
+                 position = "dodge") +
+  scale_fill_manual(values = mycolors2) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(title = "Age Distribution relative to Cardiovascular Disease",
+       x = "Age (years)",
+       y = "Population Count")
+
+mycardio %>%
+  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
+  filter(Height < 80) %>%
+  filter(Height > 50) %>%
+  ggplot() +
+  geom_histogram(mapping = aes(x = Height,
+                               fill = Cardio),
+                 bins = 20,
+                 position = "dodge") +
+  scale_fill_manual(values = mycolors2) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(title = "Height Distribution relative to Cardiovascular Disease",
+       x = "Height (inches)",
+       y = "Population Count")
+
+```
+Conclusion: A higher percentage of females are noted to be active, while more males consume alcohol and smoke. Females have higher percentage of cardiovascular disease than males by about 0.23%.
+
+## How are systolic and diastolic blood pressure indicators of Cardiovascular Disease?
+Both systolic and diastolic blood pressure seem to affect cardiovascular disease incidence. Systolic blood pressure is more of an indicator of disease than diastolic blood pressure. After a systolic blood pressure of 130 mmHg cardiovascular disease increases in rate. After 100 mmHg for diastolic blood pressure cardiovascular disease also increases in rate.
+
+
+```{r bloodpressureGraph,echo=FALSE,warning=FALSE,message=FALSE}
+mycolors <- c("green", "red")
+
+
+mycardio %>%
+  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
+  filter(Weight < 500) %>%
+  ggplot() +
+  geom_point(mapping = aes(x = `Systolic blood pressure`,
+                           y = `Diastolic blood pressure`,
+                           color = Cardio),
+             alpha = 0.1) +
+  scale_color_manual(values = mycolors) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(title = "Blood Pressure with Cardiovascular Disease",
+       x = "Systolic blood pressure (mmHg)",
+       y = "Diastolic blood pressure (mmHg)") 
+
+mycardio %>%
+  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
+  filter(Weight < 500) %>%
+  ggplot() +
+  geom_point(mapping = aes(x = `Systolic blood pressure`,
+                           y = Height,
+                           color = Cardio),
+             alpha = 0.1) +
+  scale_color_manual(values = mycolors) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(title = "Heights affect on Cardiovascular Disease",
+       x = "Systolic blood pressure (mmHg)",
+       y = "Height (inches)")
+
+mycardio %>%
+  filter(`Diastolic blood pressure` < 200 & `Systolic blood pressure` < 300 & `Diastolic blood pressure` > 30 & `Systolic blood pressure` > 30) %>%
+  filter(Weight < 500) %>%
+  ggplot() +
+  geom_point(mapping = aes(x = `Systolic blood pressure`,
+                           y = Weight,
+                           color = Cardio),
+             alpha = 0.1) +
+  scale_color_manual(values = mycolors) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(title = "Weights affect on Cardiovascular Disease",
+       x = "Systolic blood pressure (mmHg)",
+       y = "Weight (lbs)")
+```
+
+Conclusion: Both systolic and diastolic blood pressure seem to affect cardiovascular disease incidence. Systolic blood pressure is more of an indicator of disease than diastolic blood pressure. Height does not seem to affect presence of disease while weight weakly affects presence of disease.
+
 

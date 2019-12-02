@@ -23,7 +23,7 @@ vital <- read_csv("data/Data1.csv")
 
 #wrangle the data####
 rate<- vital%>%
-  select(GeoLocation,LocationAbbr,Topic,Data_Value_Type,Data_Value,Break_Out_Category,Break_Out) %>%
+  select(GeoLocation,LocationAbbr,Topic,Data_Value_Type,Data_Value,Break_Out_Category,Break_Out,Year) %>%
   mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
                         GeoLocation = str_remove_all(GeoLocation, "\\)"),
          Topic=case_when(Topic=="Diseases of the Heart (Heart Disease)"~"Heart Disease",
@@ -35,7 +35,22 @@ rate<- vital%>%
   rename("State"=LocationAbbr) %>% 
   na.omit()
 
+####Has the average mortality rate from Cardiovascular Disease in the United States increased/decreased from 2000-2017?
+yearly_avg <- rate %>% 
+  filter(Break_Out!="18-24",Break_Out!="25-44",Break_Out!="45-64") %>% 
+  group_by(Year,Break_Out_Category,Break_Out) %>% 
+  summarise(avg=mean(Data_Value))
 
+yearly_avg %>% 
+  ggplot(aes(Year,avg,color=Break_Out))+
+  geom_point()+
+  geom_line(linetype="dotted")+
+  facet_wrap(~Break_Out_Category,scales = "free")+
+  labs(title = "Average Mortality from Cardiovascular Disease in the US",
+       subtitle = "2000-2017")+
+  guides(color=FALSE)+
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
 
 ####Which states have the highest average mortality rates for each topic####
 
@@ -344,10 +359,6 @@ vitalJoinPlot <- vitalJoinPlot%>% mutate(GeoLocation = str_remove_all(GeoLocatio
   na.omit()
 
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 
 ####What lifestyle combination has the highest mortality rates for stroke in male and female ?####
@@ -376,13 +387,11 @@ plot_stroke %>% ggplot() +
 
 #### map of the us for stroke avg death rate ####
 strokeM <- vitalGender %>% filter(Topic == "Stroke", Gender == "Male",Data_Value_Type=="Age-Standardized") %>%
-=======
+
 #### map of the us for stroke avg death rate (heat map) ####
 strokeM <- vitalGender %>% filter(Data_Value_Type=="Age-Standardized") %>%
->>>>>>> bfa99871dc234a39f45d8891ce0956ad52fbb37b
   group_by(LocationAbbr) %>% summarise(avg_deathRate = mean(Data_Value)) %>% rename(state = LocationAbbr)
-=======
->>>>>>> c6f9bad140958410ac734f26916643c8c04e7634
+
 #### map of the US for stroke avg death rate (heat map) ####
 #Select only age standardized data and obtain average death rate per state
 deathRateMap <- vitalJoinPlot %>%
