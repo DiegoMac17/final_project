@@ -165,6 +165,7 @@ mycardio %>%
                  bins = 20,
                  position = "dodge") +
   scale_fill_manual(values = mycolors2) +
+  theme(plot.title = element_text(hjust = 0.5)) +
   labs(title = "Weight Distribution Relative to Cardiovascular Disease",
        x = "Weight (lbs)",
        y = "Population Count")
@@ -180,6 +181,7 @@ mycardio %>%
                  bins = 20,
                  position = "dodge") +
   scale_fill_manual(values = mycolors2) +
+  theme(plot.title = element_text(hjust = 0.5)) +
   labs(title = "Age Distribution relative to Cardiovascular Disease",
        x = "Age (years)",
        y = "Population Count")
@@ -194,6 +196,7 @@ mycardio %>%
                  bins = 20,
                  position = "dodge") +
   scale_fill_manual(values = mycolors2) +
+  theme(plot.title = element_text(hjust = 0.5)) +
   labs(title = "Height Distribution relative to Cardiovascular Disease",
        x = "Height (inches)",
        y = "Population Count")
@@ -230,6 +233,7 @@ mycardio %>%
                            color = Cardio),
              alpha = 0.1) +
   scale_color_manual(values = mycolors) +
+  theme(plot.title = element_text(hjust = 0.5)) +
   labs(title = "Heights affect on Cardiovascular Disease",
        x = "Systolic blood pressure (mmHg)",
        y = "Height (inches)")
@@ -243,6 +247,7 @@ mycardio %>%
                            color = Cardio),
              alpha = 0.1) +
   scale_color_manual(values = mycolors) +
+  theme(plot.title = element_text(hjust = 0.5)) +
   labs(title = "Weights affect on Cardiovascular Disease",
        x = "Systolic blood pressure (mmHg)",
        y = "Weight (lbs)")
@@ -294,11 +299,6 @@ state_avg_highest %>%
 ```
 
 
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
 ## Which gender has the highest average mortality from various Cardiovascular diseases?
 
 ```{r GenderMortality,echo=FALSE}
