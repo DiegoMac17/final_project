@@ -33,280 +33,6 @@ cardio <- read_csv2("data/cardio_train.csv")
 vital <- read_csv("data/Data1.csv")
 ```
 
-## Has the average mortality rate from Cardiovascular Disease in the United States increased/decreased from 2000-2017?
-
-```{r vitalhandling, echo=FALSE,warning=FALSE,message=FALSE}
-rate<- vital%>%
-  select(GeoLocation,LocationAbbr,Topic,Data_Value_Type,Data_Value,Break_Out_Category,Break_Out,Year) %>%
-  mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
-                        GeoLocation = str_remove_all(GeoLocation, "\\)"),
-         Topic=case_when(Topic=="Diseases of the Heart (Heart Disease)"~"Heart Disease",
-                         Topic=="Acute Myocardial Infarction (Heart Attack)"~"Heart Attack",
-                         TRUE~Topic)) %>% 
-  separate(GeoLocation,into = c("Latitude", "Longitude"),  ",") %>% 
-  mutate(Latitude = as.numeric(Latitude),
-         Longitude = as.numeric(Longitude)) %>% 
-  rename("State"=LocationAbbr) %>% 
-  na.omit()
-
-```
-
-```{r yearlyMortality,echo=FALSE,warning=FALSE,message=FALSE}
-yearly_avg<- rate %>% 
-  filter(Break_Out!="18-24",Break_Out!="25-44",Break_Out!="45-64") %>% 
-  group_by(Year,Break_Out_Category,Break_Out) %>% 
-  summarise(avg=mean(Data_Value))
-
-yearly_avg %>% 
-  ggplot(aes(Year,avg,color=Break_Out))+
-  geom_point()+
-  geom_line(linetype="dotted")+
-  facet_wrap(~Break_Out_Category,scales = "free")+
-  labs(title = "Average Mortality from Cardiovascular Disease in the US",
-        subtitle="2000-2017")+
-  guides(color=FALSE)+
-  theme(plot.title = element_text(hjust = 0.5),
-        plot.subtitle = element_text(hjust = 0.5))
-```
-
-
-## Which states have the highest average mortality from various Cardiovascular diseases?
-```{r stateMortality,echo=FALSE,warning=FALSE,message=FALSE}
-state_avg <- rate %>% 
-  filter(Data_Value_Type=="Age-Standardized") %>% 
-  group_by(Topic,State) %>% 
-  summarise(avg=mean(Data_Value)) %>% 
-  mutate(pct=avg/1000)
-
-#top 5 states in mortality by topic
-state_avg_highest<- state_avg %>% 
-  group_by(Topic) %>% 
-  top_n(5,pct) %>% 
-  arrange(Topic,desc(pct))
-
-#plot of the top 5 states in every topic 
-state_avg_highest %>% 
-  ggplot()+
-  geom_col(aes(reorder(State,pct),pct,fill=Topic))+
-  facet_wrap(~Topic,scales = "free")+
-  coord_flip()+
-  labs(title = "Average Mortality Among States",
-       x=element_blank())+
-  theme(plot.title = element_text(hjust = 0.5))+
-  guides(fill=FALSE)
-```
-
-
-
-## Which gender has the highest average mortality from various Cardiovascular diseases?
-
-```{r GenderMortality,echo=FALSE}
-Gender_average <- rate%>% 
-  filter(Break_Out_Category=="Gender",Data_Value_Type=="Age-Standardized") %>%
-  select(-Break_Out_Category) %>% 
-  rename(Gender = Break_Out) %>% 
-  group_by(Topic,Gender) %>% 
-  summarise(avg=mean(Data_Value)) %>% 
-  mutate(pct=avg/1000) %>% 
-  arrange(Topic,desc(pct))
-
-Gender_average %>% 
-  ggplot()+
-  geom_col(aes(Gender,pct,fill=Topic))+
-  facet_wrap(~Topic,scales = "free_y")+
-  labs(title = "Average Mortality among Gender",
-       x=element_blank())+
-  theme(plot.title = element_text(hjust = 0.5,size = 25))+
-  guides(fill=FALSE)
-```
-
-
-
-
-```{r dataPrepareJoinPlot, echo=FALSE,message=FALSE,warning=FALSE}
-#Select relevant variables from vital dataset
-vitalJoinPlot <- vital%>%
-  select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
-         HighConfidenceLimit,LowConfidenceLimit,Data_Value,Data_Value_Type) %>% 
-  arrange(Topic) %>% 
-  na.omit()
-#Use only the gender break out
-vitalJoinPlot <- vitalJoinPlot %>% filter(Break_Out_Category=="Gender") %>%
-  select(-Break_Out_Category) %>% rename(Gender = Break_Out)
-#Divide geolocation into latitude and longitude and prepare for plotting
-vitalJoinPlot <- vitalJoinPlot%>% mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
-                                     GeoLocation = str_remove_all(GeoLocation, "\\)")) %>% 
-  separate(GeoLocation,into = c("Latitude", "Longitude"),  ",") %>% 
-  mutate(Latitude = as.numeric(Latitude),
-         Longitude = as.numeric(Longitude)) %>% 
-  na.omit()
-
-```
-
-### What is the mortality among states due to Cardiovascular diseases?
-In this map we can see how the southern states of the US are more affected by cardiovascular diseases, probably because of food or lifestyle.
-From our dataset we can see that, unfortunately Mississippi, has the highest mortality rate for cardiovascular diseases with 160 per 100,000 population.
-The state with the lowest cardiovascular mortality rate is Alaska with a rate of 80 per 100,000
-
-``` {r mapUSAvgDeathRate, echo = FALSE, warning=FALSE,message=FALSE }
-#Select only age standardized data and obtain average death rate per state
-deathRateMap <- vitalJoinPlot %>%
-  filter(Data_Value_Type=="Age-Standardized") %>%
-  group_by(LocationAbbr) %>%
-  summarise(avg_deathRate = mean(Data_Value)) %>% rename(state = LocationAbbr)
-
-#create a data fram with the us states
-us_states <- us_map("states")
-#Rename abbr to state
-us_states <- us_states %>% rename(state=abbr)
-#create data frame with mortality rate for mapping
-deathRateMapUS <- left_join(us_states, deathRateMap)
-#find centroid and bind to death rate
-centroid <- aggregate(data=deathRateMapUS,
-                      cbind(x, y) ~ avg_deathRate, FUN=mean)
-#plot avg  death rate in us state map
-deathRateMapUS %>%
-  ggplot(aes(x,y, group=group, fill=avg_deathRate)) + 
-  geom_polygon(color = "darkgray", size = 0.5)+
-  scale_fill_gradient(low = "orange", 
-                      high = "purple",
-                      na.value = "gray") +
-  guides(fill= guide_legend(nrow=1)) +
-  geom_text(mapping = aes(x,y, label=round(avg_deathRate)), color = "black",
-            data = centroid,
-            inherit.aes = FALSE )+
-  theme_map()+
-  coord_equal()+
-  labs(title = " Average Death Rate - Age standarized", fill = "Rate per 100,000") +
-  theme(plot.title = element_text(hjust=0.5),
-        legend.position = "bottom")
-
-```
-
-
-## What is the relationship between age groups, life styles, Cardiovascular disease and death rates?
-As we can see on the graph there is a significant increase in the percent of people with cardiovascular disease for the second age group, and a similar trend can be seen for the mortality rate. While there is a decrease in activity from the first to second age group, it is a very small change compared to the others. It can be interpreted as that there might be other relevant factors that impact cardiovascular diseases and death rates rather than only activity.
-
-```{r lifestyleJoinDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
-#Relation between age groups and life styles and cardivascular disease
-
-#Select relevant variables 
-vitalAge <- vital%>%
-  select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
-         HighConfidenceLimit,LowConfidenceLimit,Data_Value, Data_Value_Type) %>% 
-  arrange(Topic) %>% 
-  na.omit()
-#prepare cardio data set
-cardio_j <- cardio %>%
-  rename("ID" = id,
-         "Age" = age,
-         "Gender" = gender,
-         "Height" = height,
-         "Weight" = weight,
-         "Systolic blood pressure" = ap_hi,
-         "Diastolic blood pressure" = ap_lo,
-         "Cholesterol" = cholesterol,
-         "Glucose" = gluc,
-         "Smoke" = smoke,
-         "Alcohol" = alco,
-         "Active" = active,
-         "Cardio" = cardio)
-#prepare data for wrangling
-cardio_j <- cardio_j %>%
-  mutate(Age = as.numeric(Age)/365) %>%
-  mutate(Gender = case_when(Gender == "1" ~ "Female", 
-                            Gender == "2" ~ "Male")) %>%
-  mutate(Weight = as.numeric(Weight)*2.205/10)
-
-#Use only age break out category
-vitalAge <- vitalAge %>% filter(Break_Out_Category=="Age") %>%
-  select(-Break_Out_Category) %>% rename(Age = Break_Out)
-
-#Filter for age groups that match cardio data set and obtain mean death rate
-vitalAgeRelevant <- vitalAge %>% filter(Data_Value_Type == "Crude",
-                                        Age == "25-44"| Age == "45-64" | Age == "18-24") %>%
-  group_by(Age) %>%
-  mutate(`Death Rate` = mean(Data_Value)/1000) %>%
-  distinct(Age, .keep_all = TRUE) %>% select(Age,`Death Rate`)
-#convert ages to age range to match vital data set
-mycardioAgeGroup <- cardio_j %>%
-  mutate(Age = if_else(condition = Age<44, true = "25-44", false ="45-64"))
-#obtain percent average for lifestyles 
-mycardioAgeGroup <- mycardioAgeGroup %>% group_by(Age) %>%
-  summarise(Cardio = mean(Cardio)*100,
-            Alcohol = mean(Alcohol)*100,
-            Active = mean(Active)*100,
-            Smoke = mean(Smoke)*100)
-#join vital and cardio data sets by age group
-vital_cardio_join_age <- left_join(vitalAgeRelevant,mycardioAgeGroup)
-#gather for ploting
-vital_cardio_join_plot <- vital_cardio_join_age %>%
-  gather(Pct_category,Pavg, -Age)
-#plot for comparison between lifestyles and death rate by age group
-vital_cardio_join_plot %>% 
-  ggplot(aes(Age, Pavg, color = Pct_category, group =1 ))+
-  geom_point(size = 3)+
-  geom_line(linetype = "dotted") + 
-  facet_wrap(~Pct_category, scales = "free") +
-  labs(title = "Comparison of lifestyles with average death rates",
-       x = "Age", y = "Average") + guides(color = FALSE) +
-  theme(plot.title = element_text(hjust = 0.5))
-```
-
-
-
-## What is the average mortality by state?
-Rates are expressed as per 100,000 population
-We wanted to display the different topics or diseases analyzed in the dataset to compare the mortality rates by topic for each state. With a leaflet map we were able to add labels to each state to show the mortality rates per topic in an interactive map.
-
-```{r leafletMapAvgDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
-#Select relevant variables
-vital_avg_state_all <- vital%>%
-  select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
-         HighConfidenceLimit,LowConfidenceLimit,Data_Value, Data_Value_Type) %>% 
-  arrange(Topic) %>% 
-  na.omit()
-#prepare geolocation from vital for plotting
-vital_avg_state_all <- vital_avg_state_all %>%
-  group_by(LocationAbbr) %>% mutate(avg = mean(Data_Value)) %>%
-  distinct(LocationAbbr, .keep_all = TRUE)
-vital_avg_state_all <- vital_avg_state_all%>% mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
-                                     GeoLocation = str_remove_all(GeoLocation, "\\)")) %>% 
-  separate(GeoLocation,into = c("Latitude", "Longitude"),  ",") %>% 
-  mutate(Latitude = as.numeric(Latitude),
-         Longitude = as.numeric(Longitude)) %>% 
-  na.omit()
-#filter data to use age standarized data only and get rid of umbrella disease
-state_avg_leaflet <- rate %>% 
-  filter(Data_Value_Type=="Age-Standardized",Topic!="Major Cardiovascular Disease") %>% 
-  group_by(Longitude,Latitude,State,Topic) %>% 
-  summarise(avg=mean(Data_Value)) %>% 
-  mutate(pct=avg/1000)
-#round averages for user friendly display
-state_avg_leaflet <- state_avg_leaflet %>% select(-pct) %>%
-  spread(Topic, avg) %>% mutate(`Coronary Heart Disease` = round(`Coronary Heart Disease`,2),
-                                `Heart Attack` = round(`Heart Attack`,2),
-                                `Heart Disease` = round(`Heart Disease`,2),
-                                `Heart Failure` = round(`Heart Failure`, 2),
-                                `Stroke` = round(`Stroke`, 2))
-#create labels for display on leaflet
-state_label <- sprintf("<b>Average mortality rate in: %s</b><br />Coronary Heart Disease:  %s<br/ >Heart Attack: %s<br/ >Heart Disease: %s<br/ >Heart Failure: %s<br/ >Stroke: %s",
-                       state_avg_leaflet$State,
-                    state_avg_leaflet$`Coronary Heart Disease`,
-                    state_avg_leaflet$`Heart Attack`,
-                    state_avg_leaflet$`Heart Disease`,
-                    state_avg_leaflet$`Heart Failure`,
-                    state_avg_leaflet$`Stroke`) %>%
-  lapply(htmltools::HTML)
-#Plot into leaflet 
-state_avg_leaflet %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
-  addTiles() %>% setView(-98.00,38.71,zoom=4) %>%
-  addMarkers(~Longitude, ~Latitude, label = state_label, popup = state_label)
-```
-
-
-## What are lifestyle percentages by gender, and what factors affect Cardiovascular disease incidence?
-
 ```{r cardioHandeling, echo=FALSE,warning=FALSE,message=FALSE}
 mycardio <- cardio %>%
   rename("ID" = id,
@@ -392,9 +118,15 @@ smoMa <- facetCardio %>%
 
 percentLife <- bind_rows(actFe, actMa, alcFe, alcMa, cardFe, cardMa, smoFe, smoMa)
 percentLife$Occurance <- NULL
-## What are lifestyle percentages by gender, and what factors affect Cardiovascular disease incidence?
 ```
 
+<<<<<<< HEAD
+
+
+
+=======
+>>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
+## What are lifestyle percentages by gender, and what factors affect Cardiovascular disease incidence?
 
 ```{r lifestyleGraph,echo=FALSE,warning=FALSE,message=FALSE}
 percentLife %>%
@@ -418,7 +150,6 @@ percentLife %>%
        y = "Percentage")
 ```
 
-
 ## Distributions of Lifestyles with Cardiovascular Disease
 
 ```{r lifestyleHisto,echo=FALSE,warning=FALSE,message=FALSE}
@@ -434,6 +165,7 @@ mycardio %>%
                  bins = 20,
                  position = "dodge") +
   scale_fill_manual(values = mycolors2) +
+  theme(plot.title = element_text(hjust = 0.5)) +
   labs(title = "Weight Distribution Relative to Cardiovascular Disease",
        x = "Weight (lbs)",
        y = "Population Count")
@@ -449,6 +181,7 @@ mycardio %>%
                  bins = 20,
                  position = "dodge") +
   scale_fill_manual(values = mycolors2) +
+  theme(plot.title = element_text(hjust = 0.5)) +
   labs(title = "Age Distribution relative to Cardiovascular Disease",
        x = "Age (years)",
        y = "Population Count")
@@ -463,16 +196,12 @@ mycardio %>%
                  bins = 20,
                  position = "dodge") +
   scale_fill_manual(values = mycolors2) +
+  theme(plot.title = element_text(hjust = 0.5)) +
   labs(title = "Height Distribution relative to Cardiovascular Disease",
        x = "Height (inches)",
        y = "Population Count")
 
 ```
-
-
-
-
-
 
 ## How are systolic and diastolic blood pressure indicators of Cardiovascular Disease?
 
@@ -504,6 +233,7 @@ mycardio %>%
                            color = Cardio),
              alpha = 0.1) +
   scale_color_manual(values = mycolors) +
+  theme(plot.title = element_text(hjust = 0.5)) +
   labs(title = "Heights affect on Cardiovascular Disease",
        x = "Systolic blood pressure (mmHg)",
        y = "Height (inches)")
@@ -517,9 +247,284 @@ mycardio %>%
                            color = Cardio),
              alpha = 0.1) +
   scale_color_manual(values = mycolors) +
+  theme(plot.title = element_text(hjust = 0.5)) +
   labs(title = "Weights affect on Cardiovascular Disease",
        x = "Systolic blood pressure (mmHg)",
        y = "Weight (lbs)")
 ```
 
+
+
+
+## Which states have the highest average mortality from various Cardiovascular diseases?
+
+```{r vitalHandling, echo=FALSE}
+rate<- vital%>%
+  select(GeoLocation,LocationAbbr,Topic,Data_Value_Type,Data_Value,Break_Out_Category,Break_Out) %>%
+  mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
+                        GeoLocation = str_remove_all(GeoLocation, "\\)"),
+         Topic=case_when(Topic=="Diseases of the Heart (Heart Disease)"~"Heart Disease",
+                         Topic=="Acute Myocardial Infarction (Heart Attack)"~"Heart Attack",
+                         TRUE~Topic)) %>% 
+  separate(GeoLocation,into = c("Latitude", "Longitude"),  ",") %>% 
+  mutate(Latitude = as.numeric(Latitude),
+         Longitude = as.numeric(Longitude)) %>% 
+  rename("State"=LocationAbbr) %>% 
+  na.omit()
+```
+
+
+
+```{r StateMortality, echo=FALSE}
+state_avg <- rate %>% 
+  filter(Data_Value_Type=="Age-Standardized") %>% 
+  group_by(Topic,State) %>% 
+  summarise(avg=mean(Data_Value)) %>% 
+  mutate(pct=avg/1000)
+
+state_avg_highest<- state_avg %>% 
+  group_by(Topic) %>% 
+  top_n(5,pct) %>% 
+  arrange(Topic,desc(pct))
+
+state_avg_highest %>% 
+  ggplot()+
+  geom_col(aes(reorder(State,pct),pct,fill=Topic))+
+  facet_wrap(~Topic,scales = "free")+
+  coord_flip()+
+  labs(title = "Average Mortality Among States",
+       x=element_blank())+
+  theme(plot.title = element_text(hjust = 0.5))+
+  guides(fill=FALSE)
+```
+
+
+## Which gender has the highest average mortality from various Cardiovascular diseases?
+
+```{r GenderMortality,echo=FALSE}
+Gender_average <- rate%>% 
+  filter(Break_Out_Category=="Gender",Data_Value_Type=="Age-Standardized") %>%
+  select(-Break_Out_Category) %>% 
+  rename(Gender = Break_Out) %>% 
+  group_by(Topic,Gender) %>% 
+  summarise(avg=mean(Data_Value)) %>% 
+  mutate(pct=avg/1000) %>% 
+  arrange(Topic,desc(pct))
+
+Gender_average %>% 
+  ggplot()+
+  geom_col(aes(Gender,pct,fill=Topic))+
+  facet_wrap(~Topic,scales = "free_y")+
+  labs(title = "Average Mortality among Gender",
+       x=element_blank())+
+  theme(plot.title = element_text(hjust = 0.5,size = 25))+
+  guides(fill=FALSE)
+```
+
+
+
+
+```{r dataPrepareJoinPlot, echo=FALSE,message=FALSE,warning=FALSE}
+#Select relevant variables from vital dataset
+vitalJoinPlot <- vital%>%
+  select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
+         HighConfidenceLimit,LowConfidenceLimit,Data_Value,Data_Value_Type) %>% 
+  arrange(Topic) %>% 
+  na.omit()
+#Use only the gender break out
+vitalJoinPlot <- vitalJoinPlot %>% filter(Break_Out_Category=="Gender") %>%
+  select(-Break_Out_Category) %>% rename(Gender = Break_Out)
+#Divide geolocation into latitude and longitude and prepare for plotting
+vitalJoinPlot <- vitalJoinPlot%>% mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
+                                     GeoLocation = str_remove_all(GeoLocation, "\\)")) %>% 
+  separate(GeoLocation,into = c("Latitude", "Longitude"),  ",") %>% 
+  mutate(Latitude = as.numeric(Latitude),
+         Longitude = as.numeric(Longitude)) %>% 
+  na.omit()
+
+```
+
+<<<<<<< HEAD
+### What is the mortality among states due to Cardiovascular diseases?
+In this map we can see how the southern states of the US are more affected by cardiovascular diseases, probably because of food or lifestyle.
+From our dataset we can see that, unfortunately Mississippi, has the highest mortality rate for cardiovascular diseases with 160 per 100,000 population.
+The state with the lowest cardiovascular mortality rate is Alaska with a rate of 80 per 100,000
+=======
+
+
+### What is the mortality per state due to Cardiovascular diseases?
+>>>>>>> c6f9bad140958410ac734f26916643c8c04e7634
+
+``` {r mapUSAvgDeathRate, echo = FALSE, warning=FALSE,message=FALSE }
+#Select only age standardized data and obtain average death rate per state
+deathRateMap <- vitalJoinPlot %>%
+  filter(Data_Value_Type=="Age-Standardized") %>%
+  group_by(LocationAbbr) %>%
+  summarise(avg_deathRate = mean(Data_Value)) %>% rename(state = LocationAbbr)
+
+#create a data fram with the us states
+us_states <- us_map("states")
+#Rename abbr to state
+us_states <- us_states %>% rename(state=abbr)
+#create data frame with mortality rate for mapping
+deathRateMapUS <- left_join(us_states, deathRateMap)
+#find centroid and bind to death rate
+centroid <- aggregate(data=deathRateMapUS,
+                      cbind(x, y) ~ avg_deathRate, FUN=mean)
+#plot avg  death rate in us state map
+deathRateMapUS %>%
+  ggplot(aes(x,y, group=group, fill=avg_deathRate)) + 
+  geom_polygon(color = "darkgray", size = 0.5)+
+  scale_fill_gradient(low = "orange", 
+                      high = "purple",
+                      na.value = "gray") +
+  guides(fill= guide_legend(nrow=1)) +
+  geom_text(mapping = aes(x,y, label=round(avg_deathRate)), color = "black",
+            data = centroid,
+            inherit.aes = FALSE )+
+  theme_map()+
+  coord_equal()+
+  labs(title = " Average Death Rate - Age standarized", fill = "Rate per 100,000") +
+  theme(plot.title = element_text(hjust=0.5),
+        legend.position = "bottom")
+
+```
+
+
+<<<<<<< HEAD
+## What is the relationship between age groups, life styles, Cardiovascular disease and death rates?
+As we can see on the graph there is a significant increase in the percent of people with cardiovascular disease for the second age group, and a similar trend can be seen for the mortality rate. While there is a decrease in activity from the first to second age group, it is a very small change compared to the others. It can be interpreted as that there might be other relevant factors that impact cardiovascular diseases and death rates rather than only activity.
+=======
+>>>>>>> c6f9bad140958410ac734f26916643c8c04e7634
+
+
+<<<<<<< HEAD
+=======
+
+>>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
+## What is the relation between age groups, life styles, Cardiovascular disease and death rates?
+```{r lifestyleJoinDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
+#Relation between age groups and life styles and cardivascular disease
+
+#Select relevant variables 
+vitalAge <- vital%>%
+  select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
+         HighConfidenceLimit,LowConfidenceLimit,Data_Value, Data_Value_Type) %>% 
+  arrange(Topic) %>% 
+  na.omit()
+#prepare cardio data set
+cardio_j <- cardio %>%
+  rename("ID" = id,
+         "Age" = age,
+         "Gender" = gender,
+         "Height" = height,
+         "Weight" = weight,
+         "Systolic blood pressure" = ap_hi,
+         "Diastolic blood pressure" = ap_lo,
+         "Cholesterol" = cholesterol,
+         "Glucose" = gluc,
+         "Smoke" = smoke,
+         "Alcohol" = alco,
+         "Active" = active,
+         "Cardio" = cardio)
+#prepare data for wrangling
+cardio_j <- cardio_j %>%
+  mutate(Age = as.numeric(Age)/365) %>%
+  mutate(Gender = case_when(Gender == "1" ~ "Female", 
+                            Gender == "2" ~ "Male")) %>%
+  mutate(Weight = as.numeric(Weight)*2.205/10)
+
+#Use only age break out category
+vitalAge <- vitalAge %>% filter(Break_Out_Category=="Age") %>%
+  select(-Break_Out_Category) %>% rename(Age = Break_Out)
+
+#Filter for age groups that match cardio data set and obtain mean death rate
+vitalAgeRelevant <- vitalAge %>% filter(Data_Value_Type == "Crude",
+                                        Age == "25-44"| Age == "45-64" | Age == "18-24") %>%
+  group_by(Age) %>%
+  mutate(`Death Rate` = mean(Data_Value)/1000) %>%
+  distinct(Age, .keep_all = TRUE) %>% select(Age,`Death Rate`)
+#convert ages to age range to match vital data set
+mycardioAgeGroup <- cardio_j %>%
+  mutate(Age = if_else(condition = Age<44, true = "25-44", false ="45-64"))
+#obtain percent average for lifestyles 
+mycardioAgeGroup <- mycardioAgeGroup %>% group_by(Age) %>%
+  summarise(Cardio = mean(Cardio)*100,
+            Alcohol = mean(Alcohol)*100,
+            Active = mean(Active)*100,
+            Smoke = mean(Smoke)*100)
+#join vital and cardio data sets by age group
+vital_cardio_join_age <- left_join(vitalAgeRelevant,mycardioAgeGroup)
+#gather for ploting
+vital_cardio_join_plot <- vital_cardio_join_age %>%
+  gather(Pct_category,Pavg, -Age)
+#plot for comparison between lifestyles and death rate by age group
+vital_cardio_join_plot %>% 
+  ggplot(aes(Age, Pavg, color = Pct_category, group =1 ))+
+  geom_point(size = 3)+
+  geom_line(linetype = "dotted") + 
+  facet_wrap(~Pct_category, scales = "free") +
+  labs(title = "Comparison of lifestyles with average death rates",
+       x = "Age", y = "Average") + guides(color = FALSE) +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+<<<<<<< HEAD
+
+
+
+
+=======
+>>>>>>> 93e25c51a21638c545503cee38a9c0e038c1ef71
+## What is the average mortality by state?
+Rates are expressed as per 100,000 population
+<<<<<<< HEAD
+We wanted to display the different topics or diseases analyzed in the dataset to compare the mortality rates by topic for each state. With a leaflet map we were able to add labels to each state to show the mortality rates per topic in an interactive map.
+
+=======
+>>>>>>> c6f9bad140958410ac734f26916643c8c04e7634
+```{r leafletMapAvgDeathRate, echo=FALSE,warning=FALSE,message=FALSE}
+#Select relevant variables
+vital_avg_state_all <- vital%>%
+  select(Year, Break_Out_Category,Break_Out, GeoLocation, Topic,LocationAbbr,
+         HighConfidenceLimit,LowConfidenceLimit,Data_Value, Data_Value_Type) %>% 
+  arrange(Topic) %>% 
+  na.omit()
+#prepare geolocation from vital for plotting
+vital_avg_state_all <- vital_avg_state_all %>%
+  group_by(LocationAbbr) %>% mutate(avg = mean(Data_Value)) %>%
+  distinct(LocationAbbr, .keep_all = TRUE)
+vital_avg_state_all <- vital_avg_state_all%>% mutate(GeoLocation = str_remove_all(GeoLocation, "\\("), 
+                                     GeoLocation = str_remove_all(GeoLocation, "\\)")) %>% 
+  separate(GeoLocation,into = c("Latitude", "Longitude"),  ",") %>% 
+  mutate(Latitude = as.numeric(Latitude),
+         Longitude = as.numeric(Longitude)) %>% 
+  na.omit()
+#filter data to use age standarized data only and get rid of umbrella disease
+state_avg_leaflet <- rate %>% 
+  filter(Data_Value_Type=="Age-Standardized",Topic!="Major Cardiovascular Disease") %>% 
+  group_by(Longitude,Latitude,State,Topic) %>% 
+  summarise(avg=mean(Data_Value)) %>% 
+  mutate(pct=avg/1000)
+#round averages for user friendly display
+state_avg_leaflet <- state_avg_leaflet %>% select(-pct) %>%
+  spread(Topic, avg) %>% mutate(`Coronary Heart Disease` = round(`Coronary Heart Disease`,2),
+                                `Heart Attack` = round(`Heart Attack`,2),
+                                `Heart Disease` = round(`Heart Disease`,2),
+                                `Heart Failure` = round(`Heart Failure`, 2),
+                                `Stroke` = round(`Stroke`, 2))
+#create labels for display on leaflet
+state_label <- sprintf("<b>Average mortality rate in: %s</b><br />Coronary Heart Disease:  %s<br/ >Heart Attack: %s<br/ >Heart Disease: %s<br/ >Heart Failure: %s<br/ >Stroke: %s",
+                       state_avg_leaflet$State,
+                    state_avg_leaflet$`Coronary Heart Disease`,
+                    state_avg_leaflet$`Heart Attack`,
+                    state_avg_leaflet$`Heart Disease`,
+                    state_avg_leaflet$`Heart Failure`,
+                    state_avg_leaflet$`Stroke`) %>%
+  lapply(htmltools::HTML)
+#Plot into leaflet 
+state_avg_leaflet %>% leaflet(options = leafletOptions(zoomSnap=1)) %>%
+  addTiles() %>% setView(-98.00,38.71,zoom=4) %>%
+  addMarkers(~Longitude, ~Latitude, label = state_label, popup = state_label)
+```
 
