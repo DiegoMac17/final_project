@@ -425,10 +425,7 @@ plot_stroke %>% ggplot() +
 strokeM <- vitalGender %>% filter(Topic == "Stroke", Gender == "Male",Data_Value_Type=="Age-Standardized") %>%
 =======
 #### map of the us for stroke avg death rate (heat map) ####
-strokeM <- vitalGender %>% filter(Data_Value_Type=="Age-Standardized") %>%
->>>>>>> bfa99871dc234a39f45d8891ce0956ad52fbb37b
-  group_by(LocationAbbr) %>% summarise(avg_deathRate = mean(Data_Value)) %>% rename(state = LocationAbbr)
-=======
+
 #### map of the US for stroke avg death rate (heat map) ####
 #Select only age standardized data and obtain average death rate per state
 deathRateMap <- vitalJoinPlot %>%
