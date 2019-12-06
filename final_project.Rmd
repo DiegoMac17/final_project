@@ -384,36 +384,36 @@ facetCardio <- mycardio %>%
 
 actFe <- facetCardio %>%
   filter(Gender == "Female" & Lifestyle == "Active" & Occurance == "Yes") %>%
-  mutate(percent = n/45530) %>%
+  mutate(percent = n/45530*100) %>%
   select(Gender, Lifestyle, percent)
 alcFe <- facetCardio %>%
   filter(Gender == "Female" & Lifestyle == "Alcohol" & Occurance == "Yes") %>%
-  mutate(percent = n/45530) %>%
+  mutate(percent = n/45530*100) %>%
   select(Gender, Lifestyle, percent)
 cardFe <- facetCardio %>%
   filter(Gender == "Female" & Lifestyle == "Cardio" & Occurance == "Yes") %>%
-  mutate(percent = n/45530) %>%
+  mutate(percent = n/45530*100) %>%
   select(Gender, Lifestyle, percent)
 smoFe <- facetCardio %>%
   filter(Gender == "Female" & Lifestyle == "Smoke" & Occurance == "Yes") %>%
-  mutate(percent = n/45530) %>%
+  mutate(percent = n/45530*100) %>%
   select(Gender, Lifestyle, percent)
 
 actMa <- facetCardio %>%
   filter(Gender == "Male" & Lifestyle == "Active" & Occurance == "Yes") %>%
-  mutate(percent = n/45530) %>%
+  mutate(percent = n/24470*100) %>%
   select(Gender, Lifestyle, percent)
 alcMa <- facetCardio %>%
   filter(Gender == "Male" & Lifestyle == "Alcohol" & Occurance == "Yes") %>%
-  mutate(percent = n/45530) %>%
+  mutate(percent = n/24470*100) %>%
   select(Gender, Lifestyle, percent)
 cardMa <- facetCardio %>%
   filter(Gender == "Male" & Lifestyle == "Cardio" & Occurance == "Yes") %>%
-  mutate(percent = n/45530) %>%
+  mutate(percent = n/24470*100) %>%
   select(Gender, Lifestyle, percent)
 smoMa <- facetCardio %>%
   filter(Gender == "Male" & Lifestyle == "Smoke" & Occurance == "Yes") %>%
-  mutate(percent = n/45530) %>%
+  mutate(percent = n/24470*100) %>%
   select(Gender, Lifestyle, percent)
 
 percentLife <- bind_rows(actFe, actMa, alcFe, alcMa, cardFe, cardMa, smoFe, smoMa)
